@@ -1,0 +1,24 @@
+{
+  "name": "legal-nagbar",
+  "version": "1.0.0",
+  "description": "A nagbar to add to all your projects for legal reasons",
+  "main": "./src/index.ts",
+  "author": "Tom Wiesing <tkw01536@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build-static": "copyup static/* static/*/* static/*/*/* dist",
+    "build-ts": "tsc",
+    "min-ts": "uglifyjs dist/legal.js --enclose window,console:window,console --compress --mangle  -o dist/legal.min.js",
+    "build": "yarn build-static && yarn build-ts && yarn min-ts",
+    "deploy": "yarn build && push-dir --dir=dist --branch=gh-pages"
+  },
+  "dependencies": {
+    "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.3.0",
+    "push-dir": "^0.4.1",
+    "uglify-js": "^3.10.0"
+  }
+}
