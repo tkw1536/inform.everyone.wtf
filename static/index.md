@@ -3,7 +3,7 @@ layout: default
 title: "Legal: Imprint & Privacy Policy"
 ---
 
-<script async src="/legal.min.js?fixed"></script>
+<script async src="/legal.min.js?fixed,noborder"></script>
 
 # Legal: Imprint & Privacy Policy
 
