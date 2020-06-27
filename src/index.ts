@@ -8,13 +8,45 @@ interface LegalNagBarOptions {
     /** Use fixed positioning */
     fixed?: boolean;
 
-    /** Set background color inline with dark / black */
-    background?: boolean
+    /** don't show a border */
+    noborder?: boolean;
 
     /** show the text that we use cookies */
     cookies?: boolean
 }
 type KnownOption = keyof LegalNagBarOptions;
+
+
+interface Theme {
+    color: string;
+    background: string;
+    border: string;
+    link: string; 
+}
+
+const LIGHT_THEME: Theme = {
+    color: 'black',
+    background: 'white',
+    border: 'black',
+    link: 'blue',
+}
+
+const DARK_THEME: Theme = {
+    color: 'white',
+    background: 'black',
+    border: 'white',
+    link: 'blue',
+}
+
+function onDOMReady(callback: () => void) {
+    const state = document.readyState;
+    if (state === "complete" || state === "interactive") {
+        callback();
+        return;
+    }
+    window.addEventListener('DOMContentLoaded', callback);
+}
+
 
 class LegalNagBar {
     private options: LegalNagBarOptions;
@@ -28,7 +60,7 @@ class LegalNagBar {
     }
 
     // known static options
-    private static knownOptions = ['dark', 'top', 'fixed', 'background', 'cookies'] as const;
+    private static knownOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder'] as const;
 
 
     //
@@ -39,10 +71,18 @@ class LegalNagBar {
     private static readonly TEXT_PREFIX = 'For legal reasons I must link ';
 
     private static readonly URL_POLICY = 'https://inform.everyone.wtf';
-    private static readonly URL_TITLE = 'my Privacy Policy, Imprint and Cookie Policy';
-    private static readonly URL_TITLE_COOKIES = 'my Privacy Policy and Imprint';
+    private static readonly URL_TITLE = 'my Privacy Policy and Imprint';
+    private static readonly URL_TITLE_COOKIES = 'my Privacy Policy, Imprint and Cookie Policy';
 
     private static readonly TEXT_SUFFIX = '. ';
+
+
+    //
+    // STYLE SIZES
+    //
+    private static readonly BORDER_SIZE = '1px'
+    private static readonly SMALL_SPACE = '5px'
+    private static readonly LARGE_SPACE = '10px'
 
     /**
      * Generates a new instance of LegalNagBar from a script tag. 
@@ -77,13 +117,14 @@ class LegalNagBar {
     }
 
     run() {
+        // create the element structure
+
         const preText = document.createTextNode(
             (this.options.cookies ? LegalNagBar.TEXT_PREFIX_COOKIES : '') +
             LegalNagBar.TEXT_PREFIX,
         );
         
         const link = document.createElement('a');
-        link.style.color = 'blue';
         link.setAttribute('href', LegalNagBar.URL_POLICY);
         link.setAttribute('target', '_blank');
         link.appendChild(
@@ -92,35 +133,81 @@ class LegalNagBar {
         );
 
         const postText = document.createTextNode(LegalNagBar.TEXT_SUFFIX);
-
-        const element = document.createElement('small');
+        
+        // add the element to the page
+        const element = document.createElement('p');
         element.appendChild(preText);
         element.appendChild(link);
         element.appendChild(postText);
-        
-        window.addEventListener('load', function () {
-            document.body.appendChild(element);
+
+        const parent = document.createElement('div');
+        parent.appendChild(element);
+
+        onDOMReady(() => {
+            if(this.options.top) {
+                document.body.prepend(parent);
+            } else {
+                document.body.appendChild(parent)
+            }
         });
-
-
-        // set styling
+        
+        // setup the theme
+        const theme = this.options.dark ? DARK_THEME : LIGHT_THEME;
+        if (this.options.noborder) {
+            theme.border = 'transparent';
+        }
+        
+        element.style.color = theme.color;
+        link.style.color = theme.link;
+        element.style.borderColor = theme.border;
         if (this.options.fixed) {
-            element.style.position = 'fixed';
-            element.style.bottom = '0px';
-            element.style.right = '5px';
+            element.style.background = theme.background;
+        }
+
+        // setup the positioing
+
+        if (this.options.fixed) {
+            parent.style.position = 'fixed';
+            // align to the right
+            parent.style.right = LegalNagBar.LARGE_SPACE;
+            element.style.position = 'relative';
+            element.style.right = LegalNagBar.LARGE_SPACE;
+
+            // margin and padding
+            element.style.border = `${LegalNagBar.BORDER_SIZE} solid ${theme.border}`;
+            element.style.padding = LegalNagBar.SMALL_SPACE;
+            element.style.borderRadius = LegalNagBar.LARGE_SPACE;
+
+            if (this.options.top) {
+                parent.style.top = '0px';
+            } else {
+                parent.style.bottom = '0px';
+            }
         } else {
-            element.style.float = 'right';
+
+            // align to the right
+            element.style.textAlign = 'right';
+
+            // hide overflow on the parent
+            parent.style.margin = '0';
+            parent.style.padding = '0';
+            parent.style.overflow = 'none';
+            parent.style.width = '100%';
+
+            // no margin, and proper padding
+            element.style.margin = '0';
+            element.style.paddingTop = LegalNagBar.SMALL_SPACE;
+            element.style.paddingBottom = LegalNagBar.SMALL_SPACE;
+            element.style.paddingRight = LegalNagBar.LARGE_SPACE;
+
+            // border in the right place
+            if (this.options.top) {
+                element.style.borderBottom = `${LegalNagBar.BORDER_SIZE} solid ${theme.border}`;
+            } else {
+                element.style.borderTop = `${LegalNagBar.BORDER_SIZE} solid ${theme.border}`;
+            }
         }
         
-        element.style.margin = '5px';
-        
-        if (this.options.dark) {
-            element.style.color = 'white';
-            if (this.options.background) element.style.background = 'black';
-        } else {
-            element.style.color = 'black';
-            if (this.options.background) element.style.background = 'white';
-        }
     }
 }
 

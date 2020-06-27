@@ -9,7 +9,7 @@
   "scripts": {
     "build-static": "copyup static/* static/*/* static/*/*/* dist",
     "build-ts": "tsc",
-    "min-ts": "uglifyjs dist/legal.js --enclose window,console:window,console --compress --mangle  -o dist/legal.min.js",
+    "min-ts": "uglifyjs dist/legal.js --enclose window,document,console:window,document,console --compress --mangle  -o dist/legal.min.js",
     "build": "yarn build-static && yarn build-ts && yarn min-ts",
     "deploy": "yarn build && push-dir --dir=dist --branch=gh-pages"
   },

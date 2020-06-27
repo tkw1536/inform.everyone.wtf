@@ -20,8 +20,8 @@ Where the following flags are supported:
 - `dark`: Use a dark theme instead of the default light one
 - `top`: Align the banner to the top of the page instead of the bottom
 - `fixed`: Use fixed positioning instead of the default
-- `background`: Set banner background color, instead of transparency
 - `cookies`: Show a cookies warning
+- `noborder`: Don't show a border
 
 ## Deploy
 

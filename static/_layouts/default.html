@@ -1,3 +1,7 @@
+---
+layout: compress
+---
+
 <!doctype html>
 <html lang="en">
 
@@ -5,7 +9,10 @@
     <script async src="https://track.everyone.wtf/tracker.js" data-ackee-server="https://track.everyone.wtf" data-ackee-domain-id="9ac41815-4b51-4418-984e-e5b43559a75e"></script>
     <meta charset="utf-8">
     <title>{{ page.title }}</title>
-    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    {% if page.nostyle %}
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    {% endif %}
 </head>
 
 <body>
