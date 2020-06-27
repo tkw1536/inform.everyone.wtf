@@ -11,6 +11,9 @@ interface LegalNagBarOptions {
     /** don't show a border */
     noborder?: boolean;
 
+    /** use a small instead of a p */
+    small?: boolean;
+
     /** show the text that we use cookies */
     cookies?: boolean
 }
@@ -60,7 +63,7 @@ class LegalNagBar {
     }
 
     // known static options
-    private static knownOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder'] as const;
+    private static knownOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder', 'small'] as const;
 
 
     //
@@ -135,7 +138,7 @@ class LegalNagBar {
         const postText = document.createTextNode(LegalNagBar.TEXT_SUFFIX);
         
         // add the element to the page
-        const element = document.createElement('p');
+        const element = document.createElement(this.options.small ? 'small' : 'p');
         element.appendChild(preText);
         element.appendChild(link);
         element.appendChild(postText);
@@ -163,9 +166,11 @@ class LegalNagBar {
         if (this.options.fixed) {
             element.style.background = theme.background;
         }
+        
 
         // setup the positioing
-
+        element.style.display = 'block';
+        
         if (this.options.fixed) {
             parent.style.position = 'fixed';
             // align to the right

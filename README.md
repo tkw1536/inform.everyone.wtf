@@ -22,7 +22,7 @@ Where the following flags are supported:
 - `fixed`: Use fixed positioning instead of the default
 - `cookies`: Show a cookies warning
 - `noborder`: Don't show a border
-
+- `small`: Use a `small` instead of a `p`
 ## Deploy
 
 - Run `yarn deploy` to push to gh-pages

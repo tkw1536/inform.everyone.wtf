@@ -3,7 +3,7 @@ layout: default
 title: "Legal: Imprint & Privacy Policy"
 ---
 
-<script async src="/legal.min.js?fixed,noborder"></script>
+<script async src="/legal.min.js?small"></script>
 
 # Legal: Imprint & Privacy Policy
 
@@ -102,6 +102,6 @@ In particular, cookies are not used for tracking purposes.
 Not all my sites use cookies. 
 In principle only sites not intended for the general public (such as those that require a login) use cookies. 
 However there are some exceptions. 
-If a site uses cookies, the link to this document will contain the text ```This site makes use of cookies for essential features. ```. 
+If a site uses cookies, the link to this document will contain the text ```This site makes use of cookies for essential features ```. 
 
 
