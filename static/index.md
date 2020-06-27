@@ -3,7 +3,7 @@ layout: default
 title: "Legal: Imprint & Privacy Policy"
 ---
 
-<script async src="https://inform.everyone.wtf/legal.min.js?fixed"></script>
+<script async src="/legal.min.js?fixed"></script>
 
 # Legal: Imprint & Privacy Policy
 
