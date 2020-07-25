@@ -10,26 +10,29 @@ title: "Legal: Imprint & Privacy Policy"
 <div class='abstract'>
     <h2>Abstract</h2>
     For legal reasons (<b>GDPR</b>) I am required to make a <code>Privacy Policy</code> and link it from every page. 
-    Per german law, I am also required to make an <code>Impressum</code>. 
+    Per german law, I am also required to make an <code>Imprint</code> (<code>Impressum</code>). 
     This document acts as both. 
 </div>
 
 
-## Overview
+## Imprint (in accordance with §5 TMG)
+
+{% include address.md %}
+
+## Privacy Policy
 
 Within this document, `you` (and `your`) refers to the `data subject` (in the sense of GDPR). 
 
 `I` (as well as `me` and `my`) refers to:
 
-    Tom Wiesing
-    Thomas (dash) Mann (dash) Str (dot) (space) Sixty-Four
-    two eight two one three Bremen
-    Germany
-    Phone (colon) Zero Zero Four Nine (space) Four Two One (space) Two Two Three Four Nine Seven Four
-    E (dash) Mail (colon) legal (at) tkw01536 (dot) de
+{% include address.md %}
 
 Please only contact me at this address (digitally or physically) when it is legally required. 
 See <a href="https://tkw01536.de" target="_blank">my homepage</a> for other means of getting in touch with me. 
+
+This document defines how I handle personal data relating to you. 
+This section of the document applies to all websites. 
+Additional site-specific terms are found at the bottom of this document. 
 
 Within the scope of GDPR I act as a data controller. 
 You can also consider me as the Data Protection Officer for my websites. 
@@ -44,7 +47,7 @@ I process two kinds of data relating to you:
 
 You can read more details about both categories below. 
 
-### Required Data For my Website(s) to Function
+#### Required Data For my Website(s) to Function
 
 When you use my website, your browser must establish a connection with the server. 
 When it does, it is required to transmit the following information:
@@ -70,33 +73,36 @@ None of the categories in this section allow me to identify you without addition
 By the time you could provide me with additional information that would allow me to identify you, any non-anonymized data about you would already be deleted. 
 Therefore as per `GDPR Article 11, Paragraph 2`, Articles 15 - 20 of GDPR do not apply to data collected in this category. 
 
-### Anonymized data for statistical purposes
+In addition to this data I might process additional data on a site-specific basis. 
+Site-specific terms can be found at the bottom of this page. 
+
+#### Anonymized data for statistical purposes
 
 For statistical purposes, I collect the following data:
 
 - Exact URL(s) of websites you requested
-- Which website(s) you visited immediatly preceeding my website(s)
+- Which website(s) you visited immediately preceding my website(s)
 - How long you stayed on my website
 - the Browser Version(s), Operation System(s), and Device(s) you are using to visit my website. 
 - the resolution of your screen
 - the language your browser is configured for
 - an anonymized version of your IP address
 
-All data is collected in pseudonymised form. 
+All data is collected in pseudo anonymized form. 
 Categories are collected independently, and no creation of unique user profiles takes place. 
 Furthermore, no cookie(s) are set for collecting this data. 
 
 `GDPR Rectial 26` states "`the principles of data protection should [...] not apply to anonymous information`". 
 Therefore GDPR is not applicable to this data, and GDPR does not grant you any special rights for this purpose.
 
-## Cookie Policy
+### Cookie Policy
 
 Some of my websites use cookies for essential purposes to allow persistent user sessions. 
 [Wikipedia](https://en.wikipedia.org/wiki/HTTP_cookie) says that
 
 > A [...] cookie (also called web cookie, Internet cookie, browser cookie, or simply cookie) is a small piece of data sent from a website and stored on the user's computer by the user's web browser while the user is browsing. 
 
-I will use cookies only where neccessary. 
+I will use cookies only where necessary. 
 In particular, cookies are not used for tracking purposes. 
 
 Not all my sites use cookies. 
@@ -105,3 +111,18 @@ However there are some exceptions.
 If a site uses cookies, the link to this document will contain the text ```This site makes use of cookies for essential features ```. 
 
 
+### Site-specific Terms
+
+#### 'treasure.lol'
+
+In order for the [treasure.lol](https://treasure.lol/) website to function, I store and process the following information:
+
+- when you last visited the website, so that I can remote inactive accounts from the database from time to time. 
+- when you last pressed the button to grow, so that I know when I can allow you to next press the button. 
+- the current number of points, so that I can tell you your current number of points. 
+
+This information is linked with a unique user id. 
+I store this information separately from all other data collected on my website(s). 
+In particular, I do not link this user id with any data collected when visiting any of my other websites. 
+You can delete this data by clicking the "Start over" link at the bottom of the page. 
+In this case you will be assigned a new unique user id and your points will be reset. 
