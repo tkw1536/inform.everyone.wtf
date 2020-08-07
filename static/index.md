@@ -37,7 +37,7 @@ Additional site-specific terms are found at the bottom of this document.
 Within the scope of GDPR I act as a data controller. 
 You can also consider me as the Data Protection Officer for my websites. 
 
-Except where explicitly mentioned otherwise, I am running my pages for personal, non-commerical reasons only. 
+Except where explicitly mentioned otherwise, I am running my pages for personal, non-commercial reasons only. 
 In particular, I don't make any money from running them. 
 
 I process two kinds of data relating to you:
@@ -59,7 +59,7 @@ When it does, it is required to transmit the following information:
 
 Your browser might transmit additional information, including but not limited to:
 - Content(s) of various cookies
-- Which website(s) you visited immediatly preceeding my website(s)
+- Which website(s) you visited immediately preceding my website(s)
 - The name and version of your browser
 
 Except where absolutely required, my server does not directly process this information. 
@@ -67,7 +67,7 @@ In some cases, as outlined in the next section, my server might store an anonymi
 Otherwise, all information is destroyed as soon as it is no longer needed. 
 
 I do not have any control over the extra information your browser submits. 
-If you do not wish to transmit this extra information please configure your browser appropriatly. 
+If you do not wish to transmit this extra information please configure your browser appropriately. 
 
 None of the categories in this section allow me to identify you without additional information. 
 By the time you could provide me with additional information that would allow me to identify you, any non-anonymized data about you would already be deleted. 
@@ -91,6 +91,9 @@ For statistical purposes, I collect the following data:
 All data is collected in pseudo anonymized form. 
 Categories are collected independently, and no creation of unique user profiles takes place. 
 Furthermore, no cookie(s) are set for collecting this data. 
+
+I am using a software called [Ackee](https://github.com/electerious/Ackee) to collect this data.
+If you wish to learn the details of how this collection works, you can inspect the source code of the software by clicking the link above. 
 
 `GDPR Rectial 26` states "`the principles of data protection should [...] not apply to anonymous information`". 
 Therefore GDPR is not applicable to this data, and GDPR does not grant you any special rights for this purpose.
