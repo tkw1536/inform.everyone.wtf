@@ -7,10 +7,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "build": "yarn build-static && yarn build-ts && yarn min-ts",
     "build-static": "copyup static/* static/*/* static/*/*/* dist",
     "build-ts": "tsc",
     "min-ts": "uglifyjs dist/legal.js --enclose window,document,console:window,document,console --compress --mangle  -o dist/legal.min.js",
-    "build": "yarn build-static && yarn build-ts && yarn min-ts",
+    "dev": "yarn build-static && tsc --watch",
     "deploy": "yarn build && push-dir --dir=dist --branch=gh-pages"
   },
   "dependencies": {

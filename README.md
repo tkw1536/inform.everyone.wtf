@@ -12,7 +12,7 @@ This page contains my own privacy policy as well as legal nagbar script.
 
 Add in the header:
 ```html
-<script async src="https://inform.everyone.wtf/legal.min.js?comma-seperated-flags"></script>
+<script async src="https://inform.everyone.wtf/legal.min.js?comma-seperated-flags" data-site-id='{id-for-stats}'></script>
 ```
 
 Where the following flags are supported:
