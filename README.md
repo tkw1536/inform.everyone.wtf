@@ -15,6 +15,8 @@ Add in the header:
 <script async src="https://inform.everyone.wtf/legal.min.js?comma-seperated-flags" data-site-id='{id-for-stats}'></script>
 ```
 
+When the `data-site-id` attribute is set, includes Ackee statistics script for the provided site. 
+
 Where the following flags are supported:
 
 - `dark`: Use a dark theme instead of the default light one
@@ -23,6 +25,7 @@ Where the following flags are supported:
 - `cookies`: Show a cookies warning
 - `noborder`: Don't show a border
 - `small`: Use a `small` instead of a `p`
+- `transparent`: Don't add a background, even in fixed positioning. 
 ## Deploy
 
 - Run `yarn deploy` to push to gh-pages
