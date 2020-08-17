@@ -1,35 +1,374 @@
+class Legal {
+    /**
+     * Initializes the Legal Script
+     * @param globalObject Global Object to register instance under
+     */
+    static initScript(globalObject: any) {
+        const script = document.currentScript;
+        if (script === null) {
+            debug_fatal('Something went wrong loading the legal script. ');
+            debug_fatal('This probably means document.currentScript isn\'t supported by this browser. ');
+            debug_fatal('Bailing out. ');
+            return;
+        }
+
+        globalObject.legal = Legal.fromScriptTag(script as HTMLScriptElement);
+        globalObject.legal.run();
+    }
+
+    private static readonly STATS_ID_ATTR = 'data-site-id'; // data attribute that the site id should be read from
+
+    /**
+     * Generates a new instance of Legal from a script tag. 
+     * @param element <script> element to create instance from
+     */
+    static fromScriptTag(element: HTMLScriptElement): Legal | null  {
+
+        // Read the src url from the script tag and split it into options. 
+
+        const src = element.getAttribute('src');
+        if (typeof src !== 'string') {
+            debug_fatal("Missing 'src' attribute of script. ");
+            return null;
+        }
+        const srcOptions = new URL(src, location.href).search.substr(1).split(',');
+
+        // Parse the extracted options into a proper Options Dict. 
+        // We only parse non-empty options that are URL settable. 
+        // In case of an empty option, we ignore the option. 
+        // In case of an unknown option, we log it to the console. 
+        const options: LegalOptions = {};
+
+        srcOptions.forEach( option => {
+            if (option === '') return; // this is needed when no '?' is included in the url
+
+            if(!isURLSettableOption(option)){
+                debug_warn(`Option '${option}' is not known. `);
+                return;
+            }
+
+            options[option] = true;
+        });
+
+        // When the element was loaded without an 'async' attr we should insert it right after this element. 
+        if (!element.hasAttribute('async')) {
+            options.element = element;
+        }
+
+        // When a site id was set (via a data attribute) we set the site id attribute here. 
+        const statsSiteId = element.getAttribute(Legal.STATS_ID_ATTR);
+        if (statsSiteId) {
+            options.siteID = statsSiteId;
+        }
+        
+        // Create the new Legal object from the provided options.
+        return new Legal(options);
+    }
+
+    private options: LegalOptions; // Options passed by the user
+    private theme: Theme; // The theme we're using
+
+    // all of the elements
+    private parent: HTMLDivElement;
+    private element: HTMLElement;
+    private link: HTMLAnchorElement;
+    private optOutElement: HTMLSpanElement;
+    
+    /**
+     * Creates a new instance of Legal
+     * @param options Options to be passed
+     */
+    constructor(options: LegalOptions) {
+        this.options = shallowClone(options);
+
+        // When we have an element set, turn off the fixed and no border options
+        if(this.options.element) {
+            this.options.fixed = false;
+            this.options.noborder = true;
+        }
+
+        // Setup the theme and set the border color to transparent when needed. 
+        // Because we modify theme here, we need to clone it. 
+        this.theme = shallowClone(this.options.dark ? DARK_THEME : LIGHT_THEME);
+        if (this.options.noborder) {
+            this.theme.border = 'transparent';
+        }
+
+        // If the user can not opt-out disable statistics to be safe. 
+        // That way you can't say the user could not opt out. 
+        if (!window.localStorage && this.options.siteID) {
+            debug_warn('Local Storage is not supported by this Browser. ');
+            debug_warn('Assuming that the user has opted out statistics to be safe. ');
+            delete this.options.siteID;
+        }
+
+        this.parent = document.createElement('div');
+        this.element = document.createElement(this.options.element ? 'span' : this.options.small ? 'small' : 'p');
+        this.link = document.createElement('a');
+        this.optOutElement = document.createElement('span');
+        this.setupElementTree();
+    }
+
+    //
+    // ELEMENT STRUCTURE
+    //
+    
+    private static readonly URL_POLICY = 'https://inform.everyone.wtf';
+    private static readonly URL_TITLE = 'my Privacy Policy and Imprint';
+    private static readonly URL_TITLE_COOKIES = 'my Privacy Policy, Imprint and Cookie Policy';
+
+    private static readonly TEXT_PREFIX_COOKIES = 'This site makes use of cookies for essential features. ';
+    private static readonly TEXT_PREFIX = 'For legal reasons I must link ';
+    private static readonly TEXT_SUFFIX = '. ';
+
+    /** Sets up the structure of elements on the page */
+    private setupElementTree() {
+
+        // Setup the <a> element
+        this.link.setAttribute('href', Legal.URL_POLICY);
+        this.link.setAttribute('target', '_blank');
+        this.link.appendChild(
+            document.createTextNode(
+                this.options.cookies ? Legal.URL_TITLE_COOKIES : Legal.URL_TITLE)
+        );
+
+        // Setup the element itself
+        this.element.appendChild(document.createTextNode(
+            (this.options.cookies ? Legal.TEXT_PREFIX_COOKIES : '') +
+            Legal.TEXT_PREFIX,
+        ));
+        this.element.appendChild(this.link);
+        this.element.appendChild(document.createTextNode(Legal.TEXT_SUFFIX));
+        this.element.appendChild(this.optOutElement);
+        
+        // finally append it to the parent
+        this.parent.appendChild(this.element);
+    }
+
+    //
+    // MAIN RUN CODE
+    //
+
+    run() {
+        // if we have a site-id turn on the tracking script. 
+        if(this.options.siteID) {
+            this.stats = !this.optout;
+        }
+
+        // add the CSS
+        this.applyStyle(this.parent);
+
+        onDOMReady(() => {
+            if (this.options.element) {
+                insertAfter(this.element, this.options.element);
+            } else if(this.options.top) {
+                document.body.prepend(this.parent);
+            } else {
+                document.body.appendChild(this.parent)
+            }
+        });
+    }
+
+    private static readonly BORDER_SIZE = '1px';
+    private static readonly SMALL_SPACE = '5px';
+    private static readonly LARGE_SPACE = '10px'
+
+    /**
+     * Applies the caller-selected style to the elements
+     * @param parent Parent Element that is inserted into the DOM
+     */
+    private applyStyle(parent: HTMLElement) {
+        if (this.options.element) return; // if we are in element mode, don't apply any styles
+
+        this.element.style.color = this.theme.color;
+        this.link.style.color = this.theme.link;
+
+
+        this.element.style.borderColor = this.theme.border;
+        if (this.options.fixed && !this.options.transparent) {
+            this.element.style.background = this.theme.background;
+        }
+
+        // setup the positioing
+        this.element.style.display = 'block';
+        
+        if (this.options.fixed) {
+            this.parent.style.position = 'fixed';
+            // align to the right
+            this.parent.style.right = Legal.LARGE_SPACE;
+            this.element.style.position = 'relative';
+            this.element.style.right = Legal.LARGE_SPACE;
+
+            // margin and padding
+            this.element.style.border = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
+            this.element.style.padding = Legal.SMALL_SPACE;
+            this.element.style.borderRadius = Legal.LARGE_SPACE;
+
+            if (this.options.top) {
+                this.parent.style.top = '0px';
+            } else {
+                this.parent.style.bottom = '0px';
+            }
+        } else {
+            // align to the right
+            this.element.style.textAlign = 'right';
+
+            // hide overflow on the parent
+            this.parent.style.margin = '0';
+            this.parent.style.padding = '0';
+            this.parent.style.overflow = 'none';
+            this.parent.style.width = '100%';
+
+            // no margin, and proper padding
+            this.element.style.margin = '0';
+            this.element.style.paddingTop = Legal.SMALL_SPACE;
+            this.element.style.paddingBottom = Legal.SMALL_SPACE;
+            this.element.style.paddingRight = Legal.LARGE_SPACE;
+
+            // border in the right place
+            if (this.options.top) {
+                this.element.style.borderBottom = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
+            } else {
+                this.element.style.borderTop = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
+            }
+        }
+    }
+
+    //
+    // STATS
+    //
+
+
+    private set stats(value: boolean) {
+        this.optout = !value;
+        this.generateStatsLink(!value);
+
+        if(value) {
+            this.loadStatsScript();
+        } else {
+            this.unloadStatsScript();
+        }
+    }
+
+    private statsScript?: HTMLScriptElement; // the <script> element that implements tracking
+
+    private static readonly TEXT_OPTOUT_RELOAD_NOW = "Your opt-out has been saved. To complete the opt-out, please reload the page. \n\nClick 'OK' to reload the page now. \nClick 'Cancel' to keep browsing and apply the preference when next reloading the page. ";
+
+    private static readonly ACKEE_SERVER = 'https://track.everyone.wtf'; // server for ackee
+    private static readonly ACKEE_SCRIPT = Legal.ACKEE_SERVER + '/tracker.js'; // tracker
+
+    private static readonly TEXT_STATS_ON = 'Opt-Out of Stats';
+    private static readonly TEXT_STATS_OFF = 'Undo Opt-Out of Stats';
+    private static readonly TEXT_STATS_SUFFIX = '. ';
+
+    private loadStatsScript() {
+        if(this.statsScript) return;
+
+        const scriptElement = document.createElement('script');
+        scriptElement.setAttribute('data-ackee-server', Legal.ACKEE_SERVER);
+        scriptElement.setAttribute('data-ackee-domain-id', this.options.siteID!);
+        scriptElement.setAttribute('async', '');
+        scriptElement.setAttribute('src', Legal.ACKEE_SCRIPT);
+        document.head.appendChild(scriptElement);
+
+        this.statsScript = scriptElement;
+    }
+
+    /**
+     * Attempt to unload the statistics script
+     */
+    private unloadStatsScript() {
+        // If we didn't load the script, there is nothing to do. 
+        if(this.statsScript === undefined) return;
+
+        // With the current method of inclusion it is not actually possible to unload the script. 
+        // However there might be any kind of state on the current page, so we inform the user first. 
+        if(!confirm(Legal.TEXT_OPTOUT_RELOAD_NOW)) return;
+        location.reload()
+    }
+
+    private generateStatsLink(toSetTo: boolean) {
+        this.optOutElement.innerHTML = "";
+
+        // create a link to (undo) opt-out
+        const link = document.createElement('a');
+        link.setAttribute('href', "javascript:void");
+        if (!this.options.element) {
+            link.style.color = this.theme.link;
+        }
+        link.appendChild(document.createTextNode(toSetTo ? Legal.TEXT_STATS_OFF : Legal.TEXT_STATS_ON));
+        link.addEventListener('click', (e: MouseEvent) => {
+            e.preventDefault();
+            this.stats = toSetTo;
+            return false;
+        });
+        
+        // append the text to the 'extraNode'
+        this.optOutElement.innerHTML = "";
+        this.optOutElement.appendChild(link);
+        this.optOutElement.appendChild(document.createTextNode(Legal.TEXT_STATS_SUFFIX));
+    }
+
+    //
+    // OPT-OUT STORAGE
+    //
+
+    private static readonly STATS_OPT_OUT_KEY = 'wtf.track.everyone.old.photos';
+    private static readonly STATS_OPT_OUT_VALUE = WhenYouAccidentallyComment();
+
+    private get optout(): boolean {
+        return window.localStorage.getItem(Legal.STATS_OPT_OUT_KEY) === Legal.STATS_OPT_OUT_VALUE;
+    }
+
+    private set optout(value: boolean) {
+        if(value) {
+            window.localStorage.setItem(Legal.STATS_OPT_OUT_KEY, Legal.STATS_OPT_OUT_VALUE);
+        } else {
+            window.localStorage.removeItem(Legal.STATS_OPT_OUT_KEY);
+        }
+    }
+
+}
+
+//
+// OPTIONS
+//
+
 interface LegalOptions {
-    /** Use a dark instead of a light theme */
-    dark?: boolean;
+    /** color options */
+    dark?: boolean; // use a dark theme instead of a light one
+    small?: boolean; // use a 'small' instead of a 'p' element
+    noborder?: boolean; // don't show a border
+    transparent?: boolean; // don't set a background color
 
-    /** Align the banner to the top of the page instead of the bottom */
-    top?: boolean;
 
-    /** Use fixed positioning */
-    fixed?: boolean;
+    /** position options */
+    top?: boolean; // set the banner at the top of the page instead of the bottom
+    fixed?: boolean; // use fixed positioning instead of here
+    element?: HTMLElement; // append *after* this element, instead of dynamically creating a parent
+                           // when set, all of the other styling options (dark, small, noborder, etc) are ignored. 
 
-    /** don't show a border */
-    noborder?: boolean;
-
-    /** don't show a border or background */
-    transparent?: boolean;
-
-    /** use a small instead of a p */
-    small?: boolean;
-
-    /** show the text that we use cookies */
-    cookies?: boolean;
-
-    /** if non-empty intialize the statistics code */
-    siteID?: string;
+    /** content options */
+    cookies?: boolean; // show the text that we're using cookies
+    siteID?: string; // initialize stats code with this site-id
 }
 
-type URLSettableOption = Exclude<keyof LegalOptions, 'siteID'>;
-const knownOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder', 'small', 'transparent'];
+const urlOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder', 'small', 'transparent'] as const;
+type ArrayElement<A> = A extends readonly (infer T)[] ? T : never
+type URLSettableOption = ArrayElement<typeof urlOptions>;
+
+/**
+ * Checks if a string is of type URLSettableOption
+ */
 function isURLSettableOption(option: string): option is URLSettableOption {
-    return knownOptions.indexOf(option) !== -1;
+    for (const value of urlOptions)
+        if (value === option) return true;
+    return false;
 }
 
+//
+// THEMING
+//
 
 interface Theme {
     color: string;
@@ -52,281 +391,83 @@ const DARK_THEME: Theme = {
     link: 'blue',
 }
 
-function onDOMReady(callback: () => void) {
-    const state = document.readyState;
-    if (state === "complete" || state === "interactive") {
-        callback();
-        return;
-    }
-    window.addEventListener('DOMContentLoaded', callback);
+//
+// UTILITY FUNCTIONS
+//
+
+/**
+ * Prints a warning to the warning log
+ * @param data Data to print to the debug log
+ */
+function debug_warn(...data: any) {
+    console.warn(...data);
 }
 
+/**
+ * Prints a fatal error to the error log
+ * @param data Data tro print to the error log
+ */
+function debug_fatal(...data: any) {
+    console.error(...data);
+}
 
-class Legal {
-    private options: LegalOptions;
-    
-    /**
-     * Creates a new Legal
-     * @param options Options to be passed
-     */
-    constructor(options: LegalOptions) {
-        this.options = options;
-        this.theme = this.options.dark ? DARK_THEME : LIGHT_THEME;
-        if (this.options.noborder) {
-            this.theme.border = 'transparent';
-        }
+/**
+ * Makes a shallow clone of an object, that is it copies each own property of original into a new object clone. 
+ * @param original Object to clone. 
+ */
+function shallowClone<T extends Record<string, any>>(original: T): T {
+    const clone: {[key: string]: any} = {};
+    for (const key in original) {
+        if (!original.hasOwnProperty(key)) continue;
+        clone[key] = original[key];
+    }
+    return clone as T;
+}
 
-        // If the user can not opt-out disable statistics to be safe. 
-        // That way you can't say the user could not opt out. 
-        if (!window.localStorage && this.options.siteID) {
-            console.warn('Local Storage is not supported by this Browser. ');
-            console.warn('Assuming that the user has opted out statistics to be safe. ');
-            delete this.options.siteID;
-        }
+/**
+ * OnDOMReady runs code when the DOM becomes available on the current document. 
+ * If the DOM is already available, runs code immediatly. 
+ * @param code Code to run
+ */
+function onDOMReady(code: () => void) {
+    const state = document.readyState;
+    if (state === "complete" || state === "interactive") {
+        return code();
+    }
+    window.addEventListener('DOMContentLoaded', code);
+}
 
+/**
+ * Insert an element right after a provided element
+ * @param element New element to insert
+ * @param after Element to insert after
+ */
+function insertAfter(element: HTMLElement, after: HTMLElement) {
+    const parentNode = after.parentElement;
+    if (parentNode === null) {
+        throw new Error("after.parentElement is null");
     }
 
-    private theme: Theme;
-
-    //
-    // TEXT RESOURCES
-    //
-
-    private static readonly TEXT_PREFIX_COOKIES = 'This site makes use of cookies for essential features. ';
-    private static readonly TEXT_PREFIX = 'For legal reasons I must link ';
-
-    private static readonly URL_POLICY = 'https://inform.everyone.wtf';
-    private static readonly URL_TITLE = 'my Privacy Policy and Imprint';
-    private static readonly URL_TITLE_COOKIES = 'my Privacy Policy, Imprint and Cookie Policy';
-
-    private static readonly TEXT_SUFFIX = '. ';
-
-    private static readonly TEXT_STATS_ON = 'Opt-Out of Stats';
-    private static readonly TEXT_STATS_OFF = 'Undo Opt-Out of Stats';
-    private static readonly TEXT_STATS_SUFFIX = '. ';
-
-
-    //
-    // STYLE SIZES
-    //
-    private static readonly BORDER_SIZE = '1px'
-    private static readonly SMALL_SPACE = '5px'
-    private static readonly LARGE_SPACE = '10px'
-
-
-    // node to store extra text in
-    private extraNode = document.createElement('span');
-    /**
-     * Generates a new instance of LegalNagBar from a script tag. 
-     * @param element <script> element to create instance from
-     */
-    static fromScriptTag(element: HTMLScriptElement): Legal | null  {
-
-        // read the 'src=' part of the url
-        const src = element.getAttribute('src');
-        if (typeof src !== 'string') {
-            console.error('Invalid script tag: Must be using \'src\' attribute and not be inline. ');
-            return null;
-        }
-
-        // get the search part of the url
-        const searchURL = new URL(src, location.href).search.substr(1);
-
-        // parse all string options
-        const options: LegalOptions = {};
-        if (searchURL !== '') {
-            searchURL.split(',').forEach( option => {
-                if(isURLSettableOption(option)){
-                    options[option] = true;
-                } else {
-                    console.warn(`Option '${option}' is not known. `);
-                }
-            });
-        }
-
-        // if we have a site id, set it too
-        const statsSiteId = element.getAttribute(Legal.STATS_ID_ATTR);
-        if (!!statsSiteId)
-            options.siteID = statsSiteId;
-        
-        // and make an instance
-        return new Legal(options);
+    const sibling = after.nextSibling;
+    if(sibling !== null) {
+        parentNode.insertBefore(element, sibling);
+    } else {
+        parentNode.appendChild(element);
     }
+}
 
-    run() {
-        // create the element structure
+//
+// Initialization Code
+//
 
-        const preText = document.createTextNode(
-            (this.options.cookies ? Legal.TEXT_PREFIX_COOKIES : '') +
-            Legal.TEXT_PREFIX,
-        );
-        
-        const link = document.createElement('a');
-        link.setAttribute('href', Legal.URL_POLICY);
-        link.setAttribute('target', '_blank');
-        link.appendChild(
-            document.createTextNode(
-                this.options.cookies ? Legal.URL_TITLE_COOKIES : Legal.URL_TITLE)
-        );
+Legal.initScript(window);
 
-        const postText = document.createTextNode(Legal.TEXT_SUFFIX);
-        
-        // add the element to the page
-        const element = document.createElement(this.options.small ? 'small' : 'p');
-        element.appendChild(preText);
-        element.appendChild(link);
-        element.appendChild(postText);
+//
+// Text Resources
+//
 
-        const parent = document.createElement('div');
-        parent.appendChild(element);
-
-        onDOMReady(() => {
-            if(this.options.top) {
-                document.body.prepend(parent);
-            } else {
-                document.body.appendChild(parent)
-            }
-        });
-        
-        element.style.color = this.theme.color;
-        link.style.color = this.theme.link;
-        element.style.borderColor = this.theme.border;
-        if (this.options.fixed && !this.options.transparent) {
-            element.style.background = this.theme.background;
-        }
-        
-
-        // setup the positioing
-        element.style.display = 'block';
-        
-        if (this.options.fixed) {
-            parent.style.position = 'fixed';
-            // align to the right
-            parent.style.right = Legal.LARGE_SPACE;
-            element.style.position = 'relative';
-            element.style.right = Legal.LARGE_SPACE;
-
-            // margin and padding
-            element.style.border = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
-            element.style.padding = Legal.SMALL_SPACE;
-            element.style.borderRadius = Legal.LARGE_SPACE;
-
-            if (this.options.top) {
-                parent.style.top = '0px';
-            } else {
-                parent.style.bottom = '0px';
-            }
-        } else {
-
-            // align to the right
-            element.style.textAlign = 'right';
-
-            // hide overflow on the parent
-            parent.style.margin = '0';
-            parent.style.padding = '0';
-            parent.style.overflow = 'none';
-            parent.style.width = '100%';
-
-            // no margin, and proper padding
-            element.style.margin = '0';
-            element.style.paddingTop = Legal.SMALL_SPACE;
-            element.style.paddingBottom = Legal.SMALL_SPACE;
-            element.style.paddingRight = Legal.LARGE_SPACE;
-
-            // border in the right place
-            if (this.options.top) {
-                element.style.borderBottom = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
-            } else {
-                element.style.borderTop = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
-            }
-        }
-
-        element.appendChild(this.extraNode);
-
-        // if we have a site-id turn on the tracking script. 
-        if(this.options.siteID) {
-            this.stats = !this.optout;
-        }
-    }
-
-    //
-    // STATS
-    //
-    private static readonly STATS_ID_ATTR = 'data-site-id'; // key to read site-id from
-
-    private static readonly ACKEE_SERVER = 'https://track.everyone.wtf'; // server for ackee
-    private static readonly ACKEE_SCRIPT = Legal.ACKEE_SERVER + '/tracker.js'; // tracker
-
-
-    private set stats(value: boolean) {
-        this.optout = !value;
-        this.generateStatsLink(!value);
-
-        if(value) {
-            this.loadStatsScript();
-        } else {
-            this.unloadStatsScript();
-        }
-    }
-
-    private statsScript?: HTMLScriptElement; // the <script> element that implements tracking
-
-    private loadStatsScript() {
-        if(this.statsScript) return;
-        const scriptElement = document.createElement('script');
-        scriptElement.setAttribute('data-ackee-server', Legal.ACKEE_SERVER);
-        scriptElement.setAttribute('data-ackee-domain-id', this.options.siteID!);
-        scriptElement.setAttribute('async', '');
-        scriptElement.setAttribute('src', Legal.ACKEE_SCRIPT);
-        document.head.appendChild(scriptElement);
-        this.statsScript = scriptElement;
-    }
-
-    private unloadStatsScript() {
-        if (!this.statsScript) return;
-        this.statsScript.parentNode?.removeChild(this.statsScript)
-    }
-
-    private generateStatsLink(toSetTo: boolean) {
-        this.extraNode.innerHTML = "";
-
-        // create a link to (undo) opt-out
-        const link = document.createElement('a');
-        link.setAttribute('href', "#");
-        link.style.color = this.theme.link;
-        link.appendChild(document.createTextNode(toSetTo ? Legal.TEXT_STATS_OFF : Legal.TEXT_STATS_ON));
-        link.addEventListener('click', (e: MouseEvent) => {
-            e.preventDefault();
-            this.stats = toSetTo;
-            return false;
-        });
-        
-        // set the link as the child of extraNode. 
-        this.extraNode.innerHTML = "";
-        this.extraNode.appendChild(link);
-        this.extraNode.appendChild(document.createTextNode(Legal.TEXT_STATS_SUFFIX));
-    }
-
-    //
-    // OPTOUT
-    //
-
-    
-
-    private get optout(): boolean {
-        return window.localStorage.getItem(Legal.STATS_OPT_OUT_KEY) === Legal.STATS_OPT_OUT_VALUE;
-    }
-
-    private set optout(value: boolean) {
-        if(value) {
-            window.localStorage.setItem(Legal.STATS_OPT_OUT_KEY, Legal.STATS_OPT_OUT_VALUE);
-        } else {
-            window.localStorage.removeItem(Legal.STATS_OPT_OUT_KEY);
-        }
-    }
-
-    private static readonly STATS_OPT_OUT_KEY = 'wtf.track.everyone.old.photos';
-    private static readonly STATS_OPT_OUT_VALUE = `When in the Course of human events, it becomes necessary for
+function WhenYouAccidentallyComment() { // THE ENTIRE DECLARATION OF INDEPENDENCE
+    return `When in the Course of human events, it becomes necessary for
 one people to dissolve the political bands which have connected
 them with another, and to assume, among the Powers of the earth,
 the separate and equal station to which the Laws of Nature and
@@ -486,17 +627,5 @@ levy War, conclude Peace, contract Alliances, establish Commerce,
 and to do all other Acts and Things which Independent States may
 of right do.  And for the support of this Declaration, with a firm
 reliance on the Protection of Divine Providence, we mutually pledge
-to each other our Lives, our Fortunes and our sacred Honor.`;
+to each other our Lives, our Fortunes and our sacred Honor.` as const;
 }
-
-// read the current script
-const script = document.currentScript;
-if (script === null) {
-    console.error('Something went wrong loading the legal script. ');
-    console.error('This probably means document.currentScript isn\'t supported by this browser. ');
-    console.error('Bailing out. ');
-} else {
-    (window as any).legal = Legal.fromScriptTag(script as HTMLScriptElement);
-    (window as any).legal.run();
-}
-

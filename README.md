@@ -12,10 +12,11 @@ This page contains my own privacy policy as well as legal nagbar script.
 
 Add in the header:
 ```html
-<script async src="https://inform.everyone.wtf/legal.min.js?comma-seperated-flags" data-site-id='{id-for-stats}'></script>
+<script async="" src="https://inform.everyone.wtf/legal.min.js?comma-seperated-flags" data-site-id='{id-for-stats}'></script>
 ```
 
 When the `data-site-id` attribute is set, includes Ackee statistics script for the provided site. 
+When the async attribute is omitted this script will add the element after the script tag that is including it. 
 
 Where the following flags are supported:
 
