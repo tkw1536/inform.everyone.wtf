@@ -11,14 +11,20 @@
     "build-static": "copyup static/* static/*/* static/*/*/* dist",
     "build-ts": "tsc",
     "min-ts": "uglifyjs dist/legal.js --enclose window,document,console:window,document,console --compress --mangle  -o dist/legal.min.js",
-    "dev": "yarn build-static && tsc --watch",
-    "deploy": "yarn build && push-dir --dir=dist --branch=gh-pages"
+    "deploy": "yarn build && push-dir --dir=dist --branch=gh-pages",
+
+    "dev": "rm -rf dist && yarn build && concurrently --kill-others \"yarn dev-ts\" \"yarn dev-min\" \"yarn dev-static\" \"cd dist && jekyll serve\"",
+    "dev-ts": "tsc --watch --preserveWatchOutput",
+    "dev-min": "nodemon --watch ./dist/legal.js --exec 'yarn min-ts'",
+    "dev-static": "nodemon --ext '*' --watch ./static/  --exec 'yarn build-static' "
   },
   "dependencies": {
     "typescript": "^3.9.5"
   },
   "devDependencies": {
+    "concurrently": "^5.3.0",
     "copyfiles": "^2.3.0",
+    "nodemon": "^2.0.4",
     "push-dir": "^0.4.1",
     "uglify-js": "^3.10.0"
   }
