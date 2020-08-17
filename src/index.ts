@@ -11,6 +11,9 @@ interface LegalOptions {
     /** don't show a border */
     noborder?: boolean;
 
+    /** don't show a border or background */
+    transparent?: boolean;
+
     /** use a small instead of a p */
     small?: boolean;
 
@@ -22,7 +25,7 @@ interface LegalOptions {
 }
 
 type URLSettableOption = Exclude<keyof LegalOptions, 'siteID'>;
-const knownOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder', 'small'];
+const knownOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder', 'small', 'transparent'];
 function isURLSettableOption(option: string): option is URLSettableOption {
     return knownOptions.indexOf(option) !== -1;
 }
@@ -188,7 +191,7 @@ class Legal {
         element.style.color = this.theme.color;
         link.style.color = this.theme.link;
         element.style.borderColor = this.theme.border;
-        if (this.options.fixed) {
+        if (this.options.fixed && !this.options.transparent) {
             element.style.background = this.theme.background;
         }
         
