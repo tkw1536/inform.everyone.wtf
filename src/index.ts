@@ -81,18 +81,20 @@ class Legal {
     constructor(options: LegalOptions) {
         this.options = shallowClone(options);
 
-        // When we have an element set, turn off the fixed and no border options
-        if(this.options.element) {
-            this.options.fixed = false;
-            this.options.noborder = true;
-        }
-
         // Setup the theme and set the border color to transparent when needed. 
         // Because we modify theme here, we need to clone it. 
         this.theme = shallowClone(this.options.dark ? DARK_THEME : LIGHT_THEME);
-        if (this.options.noborder) {
+        if (!this.options.inline) {
             this.theme.border = 'transparent';
         }
+
+        // When we have an element set, turn off the fixed and no border options
+        if(this.options.element) {
+            this.options.inline = true;
+            this.theme.border = 'transparent';
+        }
+
+
 
         // If the user can not opt-out disable statistics to be safe. 
         // That way you can't say the user could not opt out. 
@@ -103,7 +105,7 @@ class Legal {
         }
 
         this.parent = document.createElement('div');
-        this.element = document.createElement(this.options.element ? 'span' : this.options.small ? 'small' : 'p');
+        this.element = document.createElement(this.options.element ? 'span' : 'small');
         this.link = document.createElement('a');
         this.optOutElement = document.createElement('span');
         this.setupElementTree();
@@ -161,8 +163,6 @@ class Legal {
         onDOMReady(() => {
             if (this.options.element) {
                 insertAfter(this.element, this.options.element);
-            } else if(this.options.top) {
-                document.body.prepend(this.parent);
             } else {
                 document.body.appendChild(this.parent)
             }
@@ -185,14 +185,14 @@ class Legal {
 
 
         this.element.style.borderColor = this.theme.border;
-        if (this.options.fixed && !this.options.transparent) {
+        if (!this.options.inline) {
             this.element.style.background = this.theme.background;
         }
 
         // setup the positioing
         this.element.style.display = 'block';
         
-        if (this.options.fixed) {
+        if (!this.options.inline) {
             this.parent.style.position = 'fixed';
             // align to the right
             this.parent.style.right = Legal.LARGE_SPACE;
@@ -204,11 +204,7 @@ class Legal {
             this.element.style.padding = Legal.SMALL_SPACE;
             this.element.style.borderRadius = Legal.LARGE_SPACE;
 
-            if (this.options.top) {
-                this.parent.style.top = '0px';
-            } else {
-                this.parent.style.bottom = '0px';
-            }
+            this.parent.style.bottom = '0px';
         } else {
             // align to the right
             this.element.style.textAlign = 'right';
@@ -226,11 +222,7 @@ class Legal {
             this.element.style.paddingRight = Legal.LARGE_SPACE;
 
             // border in the right place
-            if (this.options.top) {
-                this.element.style.borderBottom = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
-            } else {
-                this.element.style.borderTop = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
-            }
+            this.element.style.borderTop = `${Legal.BORDER_SIZE} solid ${this.theme.border}`;
         }
     }
 
@@ -337,14 +329,9 @@ class Legal {
 interface LegalOptions {
     /** color options */
     dark?: boolean; // use a dark theme instead of a light one
-    small?: boolean; // use a 'small' instead of a 'p' element
-    noborder?: boolean; // don't show a border
-    transparent?: boolean; // don't set a background color
-
 
     /** position options */
-    top?: boolean; // set the banner at the top of the page instead of the bottom
-    fixed?: boolean; // use fixed positioning instead of here
+    inline?: boolean; // use 'float:right' instead of fixed positioning
     element?: HTMLElement; // append *after* this element, instead of dynamically creating a parent
                            // when set, all of the other styling options (dark, small, noborder, etc) are ignored. 
 
@@ -353,7 +340,7 @@ interface LegalOptions {
     siteID?: string; // initialize stats code with this site-id
 }
 
-const urlOptions = ['dark', 'top', 'fixed', 'cookies', 'noborder', 'small', 'transparent'] as const;
+const urlOptions = ['cookies', 'dark', 'inline'] as const;
 type ArrayElement<A> = A extends readonly (infer T)[] ? T : never
 type URLSettableOption = ArrayElement<typeof urlOptions>;
 

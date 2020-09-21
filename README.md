@@ -20,13 +20,10 @@ When the async attribute is omitted this script will add the element after the s
 
 Where the following flags are supported:
 
-- `dark`: Use a dark theme instead of the default light one
-- `top`: Align the banner to the top of the page instead of the bottom
-- `fixed`: Use fixed positioning instead of the default
 - `cookies`: Show a cookies warning
-- `noborder`: Don't show a border
-- `small`: Use a `small` instead of a `p`
-- `transparent`: Don't add a background, even in fixed positioning. 
+- `dark`: Use a dark theme instead of the default light one
+- `inline`: Use `float: right` positioning instead of `position: fixed`
+
 ## Deploy
 
 - Run `yarn deploy` to push to gh-pages
