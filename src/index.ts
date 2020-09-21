@@ -39,7 +39,7 @@ class Legal {
         // In case of an unknown option, we log it to the console. 
         const options: LegalOptions = {};
 
-        srcOptions.forEach( option => {
+        forEach(srcOptions, option => {
             if (option === '') return; // this is needed when no '?' is included in the url
 
             if(!isURLSettableOption(option)){
@@ -154,7 +154,7 @@ class Legal {
     run() {
         // if we have a site-id turn on the tracking script. 
         if(this.options.siteID) {
-            this.stats = !this.optout;
+            this.setStats(!this.getOptout());
         }
 
         // add the CSS
@@ -231,8 +231,8 @@ class Legal {
     //
 
 
-    private set stats(value: boolean) {
-        this.optout = !value;
+    private setStats(value: boolean) {
+        this.setOptout(!value);
         this.generateStatsLink(!value);
 
         if(value) {
@@ -291,7 +291,7 @@ class Legal {
         link.appendChild(document.createTextNode(toSetTo ? Legal.TEXT_STATS_OFF : Legal.TEXT_STATS_ON));
         link.addEventListener('click', (e: MouseEvent) => {
             e.preventDefault();
-            this.stats = toSetTo;
+            this.setStats(toSetTo);
             return false;
         });
         
@@ -308,11 +308,11 @@ class Legal {
     private static readonly STATS_OPT_OUT_KEY = 'wtf.track.everyone.old.photos';
     private static readonly STATS_OPT_OUT_VALUE = WhenYouAccidentallyComment();
 
-    private get optout(): boolean {
+    private getOptout(): boolean {
         return window.localStorage.getItem(Legal.STATS_OPT_OUT_KEY) === Legal.STATS_OPT_OUT_VALUE;
     }
 
-    private set optout(value: boolean) {
+    private setOptout(value: boolean) {
         if(value) {
             window.localStorage.setItem(Legal.STATS_OPT_OUT_KEY, Legal.STATS_OPT_OUT_VALUE);
         } else {
@@ -387,6 +387,7 @@ const DARK_THEME: Theme = {
  * @param data Data to print to the debug log
  */
 function debug_warn(...data: any) {
+    if (!(console && console.warn)) return;
     console.warn(...data);
 }
 
@@ -395,7 +396,20 @@ function debug_warn(...data: any) {
  * @param data Data tro print to the error log
  */
 function debug_fatal(...data: any) {
+    if (!(console && console.error)) return;
     console.error(...data);
+}
+
+/**
+ * Foreach runs a fyunction for each element of an array
+ */
+function forEach<T>(ary: T[], f: (e: T) => void) {
+    if (typeof ary.forEach === 'function')
+        return ary.forEach(f)
+
+    for(let i = 0; i < ary.length; i++) {
+        f(ary[i]);
+    }
 }
 
 /**
