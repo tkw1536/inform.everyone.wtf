@@ -84,13 +84,13 @@ class Legal {
         // Setup the theme and set the border color to transparent when needed. 
         // Because we modify theme here, we need to clone it. 
         this.theme = shallowClone(this.options.dark ? DARK_THEME : LIGHT_THEME);
-        if (!this.options.inline) {
+        if (!this.options.float) {
             this.theme.border = 'transparent';
         }
 
         // When we have an element set, turn off the fixed and no border options
         if(this.options.element) {
-            this.options.inline = true;
+            this.options.float = true;
             this.theme.border = 'transparent';
         }
 
@@ -185,14 +185,14 @@ class Legal {
 
 
         this.element.style.borderColor = this.theme.border;
-        if (!this.options.inline) {
+        if (!this.options.float) {
             this.element.style.background = this.theme.background;
         }
 
         // setup the positioing
         this.element.style.display = 'block';
         
-        if (!this.options.inline) {
+        if (!this.options.float) {
             this.parent.style.position = 'fixed';
             // align to the right
             this.parent.style.right = Legal.LARGE_SPACE;
@@ -331,7 +331,7 @@ interface LegalOptions {
     dark?: boolean; // use a dark theme instead of a light one
 
     /** position options */
-    inline?: boolean; // use 'float:right' instead of fixed positioning
+    float?: boolean; // use 'float:right' instead of fixed positioning
     element?: HTMLElement; // append *after* this element, instead of dynamically creating a parent
                            // when set, all of the other styling options (dark, small, noborder, etc) are ignored. 
 
@@ -340,7 +340,7 @@ interface LegalOptions {
     siteID?: string; // initialize stats code with this site-id
 }
 
-const urlOptions = ['cookies', 'dark', 'inline'] as const;
+const urlOptions = ['cookies', 'dark', 'float'] as const;
 type ArrayElement<A> = A extends readonly (infer T)[] ? T : never
 type URLSettableOption = ArrayElement<typeof urlOptions>;
 

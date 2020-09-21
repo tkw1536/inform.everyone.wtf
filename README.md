@@ -22,7 +22,7 @@ Where the following flags are supported:
 
 - `cookies`: Show a cookies warning
 - `dark`: Use a dark theme instead of the default light one
-- `inline`: Use `float: right` positioning instead of `position: fixed`
+- `float`: Use `float: right` positioning instead of `position: fixed`
 
 ## Deploy
 
