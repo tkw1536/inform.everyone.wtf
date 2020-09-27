@@ -4,7 +4,7 @@ class Legal {
      * @param globalObject Global Object to register instance under
      */
     static initScript(globalObject: any) {
-        const script = document.currentScript;
+        const script = currentScript();
         if (script === null) {
             debug_fatal('Something went wrong loading the legal script. ');
             debug_fatal('This probably means document.currentScript isn\'t supported by this browser. ');
@@ -410,6 +410,17 @@ function forEach<T>(ary: T[], f: (e: T) => void) {
     for(let i = 0; i < ary.length; i++) {
         f(ary[i]);
     }
+}
+
+/** currentScript returns the current script that is being executed */
+function currentScript(): HTMLScriptElement | SVGScriptElement | null {
+    const script = document.currentScript;
+    if (script !== null) {
+        return script;
+    }
+
+    const scripts = document.getElementsByTagName("script");
+    return scripts[scripts.length - 1];
 }
 
 /**
