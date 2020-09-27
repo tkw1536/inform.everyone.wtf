@@ -158,7 +158,7 @@ class Legal {
         }
 
         // add the CSS
-        this.applyStyle(this.parent);
+        this.applyStyle();
 
         onDOMReady(() => {
             if (this.options.element) {
@@ -177,7 +177,7 @@ class Legal {
      * Applies the caller-selected style to the elements
      * @param parent Parent Element that is inserted into the DOM
      */
-    private applyStyle(parent: HTMLElement) {
+    private applyStyle() {
         if (this.options.element) return; // if we are in element mode, don't apply any styles
 
         this.element.style.color = this.theme.color;
