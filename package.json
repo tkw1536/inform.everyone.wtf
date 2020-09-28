@@ -2,21 +2,27 @@
   "name": "legal-nagbar",
   "version": "1.0.0",
   "description": "A nagbar to add to all your projects for legal reasons",
-  "main": "./src/index.ts",
   "author": "Tom Wiesing <tkw01536@gmail.com>",
   "license": "MIT",
   "private": true,
+  "browser": "dist/legal.min.js",
+  "targets": {
+    "browser": {
+      "engines": {
+        "browsers": [
+          "last 5 years, IE >= 11"
+        ]
+      }
+    }
+  },
   "scripts": {
-    "build": "yarn build-static && yarn build-ts && yarn min-ts",
+    "build": "parcel build --no-cache src/index.ts",
     "build-static": "copyup static/* static/*/* static/*/*/* dist",
-    "build-ts": "tsc",
-    "min-ts": "uglifyjs dist/legal.js --enclose window,document,console:window,document,console --compress --mangle  -o dist/legal.min.js",
-    "deploy": "yarn build && push-dir --dir=dist --branch=gh-pages",
-
-    "dev": "rm -rf dist && yarn build && concurrently --kill-others \"yarn dev-ts\" \"yarn dev-min\" \"yarn dev-static\" \"cd dist && jekyll serve\"",
-    "dev-ts": "tsc --watch --preserveWatchOutput",
-    "dev-min": "nodemon --watch ./dist/legal.js --exec 'yarn min-ts'",
-    "dev-static": "nodemon --ext '*' --watch ./static/  --exec 'yarn build-static' "
+    "dev": "rm -rf dist && yarn build && concurrently --kill-others \"yarn dev-ts\" \"yarn dev-static\" \"cd dist && jekyll serve\"",
+    "dev-ts": "nodemon --ext '*' --watch ./src/  --exec 'NODE_ENV=development yarn build --no-minify'",
+    "dev-static": "nodemon --ext '*' --watch ./static/  --exec 'yarn build-static' ",
+    "dist": "NODE_ENV=production yarn build --no-source-maps && yarn build-static",
+    "deploy": "yarn dist && push-dir --dir=dist --branch=gh-pages"
   },
   "dependencies": {
     "typescript": "^3.9.5"
@@ -25,7 +31,7 @@
     "concurrently": "^5.3.0",
     "copyfiles": "^2.3.0",
     "nodemon": "^2.0.4",
-    "push-dir": "^0.4.1",
-    "uglify-js": "^3.10.0"
+    "parcel": "^2.0.0-beta.1",
+    "push-dir": "^0.4.1"
   }
 }
