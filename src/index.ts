@@ -1,4 +1,39 @@
-class Legal {
+/**
+ * LegalConfig is a namespace that acts as the configuration for this script
+ */
+class LegalConfig {
+    protected static readonly URL_POLICY = 'https://inform.everyone.wtf'; // end-user URL for policy
+    protected static readonly ACKEE_SERVER = 'https://track.everyone.wtf'; // Server for ackee script. Set to empty string to disable. 
+    protected static readonly ACKEE_SCRIPT = LegalConfig.ACKEE_SERVER + '/tracker.js'; // tracker
+
+    // text for cookies, Privacy Policy and things
+    protected static readonly TEXT_PREFIX = 'For legal reasons I must link ';
+    protected static readonly URL_TITLE = 'my Privacy Policy and Imprint';
+    protected static readonly URL_TITLE_COOKIES = 'my Privacy Policy, Imprint and Cookie Policy';
+    protected static readonly TEXT_SUFFIX = '. ';
+
+    protected static readonly TEXT_PREFIX_COOKIES = 'This site makes use of cookies for essential features. ';
+
+    // text for opt-out
+    protected static readonly TEXT_STATS_ON = 'Opt-Out of Stats';
+    protected static readonly TEXT_STATS_OFF = 'Undo Opt-Out of Stats';
+    protected static readonly TEXT_STATS_SUFFIX = '. ';
+    protected static readonly TEXT_OPTOUT_RELOAD_NOW = "Your opt-out has been saved. To complete the opt-out, please reload the page. \n\nClick 'OK' to reload the page now. \nClick 'Cancel' to keep browsing and apply the preference when next reloading the page. ";
+
+    // attribute to read the 'site-id' from
+    protected static readonly STATS_ID_ATTR = 'data-site-id'; // data attribute that the site id should be read from
+
+    // spacing for rendered elements
+    protected static readonly BORDER_SIZE = '1px';
+    protected static readonly SMALL_SPACE = '5px';
+    protected static readonly LARGE_SPACE = '10px';
+
+    // data for opt-out
+    protected static readonly STATS_OPT_OUT_KEY = 'wtf.track.everyone.old.photos';
+    protected static readonly STATS_OPT_OUT_VALUE = WhenYouAccidentallyComment();
+}
+
+class Legal extends LegalConfig {
     /**
      * Initializes the Legal Script
      * @param globalObject Global Object to register instance under
@@ -16,8 +51,6 @@ class Legal {
         globalObject.legal.run();
     }
 
-    private static readonly STATS_ID_ATTR = 'data-site-id'; // data attribute that the site id should be read from
-
     /**
      * Generates a new instance of Legal from a script tag. 
      * @param element <script> element to create instance from
@@ -25,7 +58,6 @@ class Legal {
     static fromScriptTag(element: HTMLScriptElement): Legal | null  {
 
         // Read the src url from the script tag and split it into options. 
-
         const src = element.getAttribute('src');
         if (typeof src !== 'string') {
             debug_fatal("Missing 'src' attribute of script. ");
@@ -40,7 +72,7 @@ class Legal {
         const options: LegalOptions = {};
 
         forEach(srcOptions, option => {
-            if (option === '') return; // this is needed when no '?' is included in the url
+            if (option === '') return;
 
             if(!isURLSettableOption(option)){
                 debug_warn(`Option '${option}' is not known. `);
@@ -79,6 +111,7 @@ class Legal {
      * @param options Options to be passed
      */
     constructor(options: LegalOptions) {
+        super();
         this.options = shallowClone(options);
 
         // Setup the theme and set the border color to transparent when needed. 
@@ -114,14 +147,6 @@ class Legal {
     //
     // ELEMENT STRUCTURE
     //
-    
-    private static readonly URL_POLICY = 'https://inform.everyone.wtf';
-    private static readonly URL_TITLE = 'my Privacy Policy and Imprint';
-    private static readonly URL_TITLE_COOKIES = 'my Privacy Policy, Imprint and Cookie Policy';
-
-    private static readonly TEXT_PREFIX_COOKIES = 'This site makes use of cookies for essential features. ';
-    private static readonly TEXT_PREFIX = 'For legal reasons I must link ';
-    private static readonly TEXT_SUFFIX = '. ';
 
     /** Sets up the structure of elements on the page */
     private setupElementTree() {
@@ -141,7 +166,10 @@ class Legal {
         ));
         this.element.appendChild(this.link);
         this.element.appendChild(document.createTextNode(Legal.TEXT_SUFFIX));
-        this.element.appendChild(this.optOutElement);
+
+        if (Legal.ACKEE_SERVER) {
+            this.element.appendChild(this.optOutElement);
+        }
         
         // finally append it to the parent
         this.parent.appendChild(this.element);
@@ -153,7 +181,7 @@ class Legal {
 
     run() {
         // if we have a site-id turn on the tracking script. 
-        if(this.options.siteID) {
+        if(this.options.siteID && Legal.ACKEE_SERVER) {
             this.setStats(!this.getOptout());
         }
 
@@ -169,10 +197,6 @@ class Legal {
         });
     }
 
-    private static readonly BORDER_SIZE = '1px';
-    private static readonly SMALL_SPACE = '5px';
-    private static readonly LARGE_SPACE = '10px'
-
     /**
      * Applies the caller-selected style to the elements
      * @param parent Parent Element that is inserted into the DOM
@@ -182,7 +206,6 @@ class Legal {
 
         this.element.style.color = this.theme.color;
         this.link.style.color = this.theme.link;
-
 
         this.element.style.borderColor = this.theme.border;
         if (!this.options.float) {
@@ -230,7 +253,9 @@ class Legal {
     // STATS
     //
 
-
+    /**
+     * set stats sets up the statistics script to to toggle on or off
+     */
     private setStats(value: boolean) {
         this.setOptout(!value);
         this.generateStatsLink(!value);
@@ -244,17 +269,11 @@ class Legal {
 
     private statsScript?: HTMLScriptElement; // the <script> element that implements tracking
 
-    private static readonly TEXT_OPTOUT_RELOAD_NOW = "Your opt-out has been saved. To complete the opt-out, please reload the page. \n\nClick 'OK' to reload the page now. \nClick 'Cancel' to keep browsing and apply the preference when next reloading the page. ";
-
-    private static readonly ACKEE_SERVER = 'https://track.everyone.wtf'; // server for ackee
-    private static readonly ACKEE_SCRIPT = Legal.ACKEE_SERVER + '/tracker.js'; // tracker
-
-    private static readonly TEXT_STATS_ON = 'Opt-Out of Stats';
-    private static readonly TEXT_STATS_OFF = 'Undo Opt-Out of Stats';
-    private static readonly TEXT_STATS_SUFFIX = '. ';
-
+    /**
+     * load the statistics script
+     */
     private loadStatsScript() {
-        if(this.statsScript) return;
+        if(this.statsScript || !Legal.ACKEE_SERVER) return;
 
         const scriptElement = document.createElement('script');
         scriptElement.setAttribute('data-ackee-server', Legal.ACKEE_SERVER);
@@ -267,18 +286,22 @@ class Legal {
     }
 
     /**
-     * Attempt to unload the statistics script
+     * Unload the statistics script
      */
     private unloadStatsScript() {
         // If we didn't load the script, there is nothing to do. 
         if(this.statsScript === undefined) return;
 
-        // With the current method of inclusion it is not actually possible to unload the script. 
+        // With the current method of inclusion it is not actually possible to unload the script.
+        // We need to reload the page first. 
         // However there might be any kind of state on the current page, so we inform the user first. 
         if(!confirm(Legal.TEXT_OPTOUT_RELOAD_NOW)) return;
         location.reload()
     }
 
+    /**
+     * generateStatsLink sets the stats link to update the state to toSetTo
+     */
     private generateStatsLink(toSetTo: boolean) {
         this.optOutElement.innerHTML = "";
 
@@ -301,17 +324,18 @@ class Legal {
         this.optOutElement.appendChild(document.createTextNode(Legal.TEXT_STATS_SUFFIX));
     }
 
-    //
-    // OPT-OUT STORAGE
-    //
 
-    private static readonly STATS_OPT_OUT_KEY = 'wtf.track.everyone.old.photos';
-    private static readonly STATS_OPT_OUT_VALUE = WhenYouAccidentallyComment();
-
+    /**
+     * getOptOut gets the optOutState
+     */
     private getOptout(): boolean {
         return window.localStorage.getItem(Legal.STATS_OPT_OUT_KEY) === Legal.STATS_OPT_OUT_VALUE;
     }
 
+    /**
+     * setOptOut gets the optOutState
+     * @param value 
+     */
     private setOptout(value: boolean) {
         if(value) {
             window.localStorage.setItem(Legal.STATS_OPT_OUT_KEY, Legal.STATS_OPT_OUT_VALUE);
