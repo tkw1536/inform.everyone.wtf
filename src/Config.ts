@@ -14,7 +14,7 @@ export const ACKEE_SCRIPT_URL = ACKEE_SERVER ? ACKEE_SERVER + "/tracker.js": und
 export const STATS_ID_ATTR = process.env.STATS_ID_ATTR || "data-site-id";
 
 /** localStorage key to use for opt-out*/
-export const STATS_OPT_OUT_KEY = process.env.STATS_OPT_OUT_KEY || "wtf.track.everyone.old.photos";
+export const STATS_OPT_OUT_KEY = process.env.STATS_OPT_OUT_KEY || "wtf.track.everyone.optout";
 /** localStoage value to use for opt-out, anything in that key is valid */
 export const STATS_OPT_OUT_VALUE = process.env.STATS_OPT_OUT_VALUE || "1";
 
