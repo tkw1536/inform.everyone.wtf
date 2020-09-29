@@ -1,12 +1,12 @@
 interface ITheme {
-    /* foreground color */
-    f: string;
-
-    /* border style */
-    bo: string;
+    /* primary color (foreground) */
+    p: string;
 
     /* secondary color (background) */
     s: string;
+
+    /* border style */
+    b: string;
 
     /* link color */
     l: string;
@@ -17,16 +17,16 @@ const white = '#fff';
 const blue = '#00f';
 
 export const LIGHT_THEME: ITheme = {
-    f: black,
+    p: black,
     s: white,
-    bo: black,
+    b: black,
     l: blue,
 }
 
 export const DARK_THEME: ITheme = {
-    f: white,
+    p: white,
     s: black,
-    bo: white,
+    b: white,
     l: blue,
 }
 

@@ -1,10 +1,10 @@
 import {
     ACKEE_SCRIPT_URL, ACKEE_SERVER, STATS_OPT_OUT_KEY, STATS_OPT_OUT_VALUE
 } from "./Config";
-import { TEXT_OPTOUT_RELOAD_NOW, TEXT_STATS_OFF, TEXT_STATS_ON, TEXT_STATS_SUFFIX } from "./Text";
+import { TEXT_OPTOUT_RELOAD_NOW, TEXT_STATS, TEXT_STATS_OFF_PREFIX, TEXT_STATS_SUFFIX } from "./Text";
 import { debug_info } from "./util/debug";
-import { createElement, createTextNode } from "./util/dom";
-import { doc, win } from "./util/globals";
+import { appendChild, createElement, createTextNode, setAttribute } from "./util/dom";
+
 
 /**
  * Creates a new StatsTrack instance
@@ -54,14 +54,12 @@ export class StatsTracker {
     
         if(this.s || !ACKEE_SERVER || !ACKEE_SCRIPT_URL) return;
 
-        const scriptElement = createElement('script');
-        scriptElement.setAttribute('data-ackee-server', ACKEE_SERVER);
-        scriptElement.setAttribute('data-ackee-domain-id', this.i!);
-        scriptElement.setAttribute('async', '');
-        scriptElement.setAttribute('src', ACKEE_SCRIPT_URL);
-        doc.head.appendChild(scriptElement);
-
-        this.s = scriptElement;
+        const scriptElement = this.s = createElement('script');
+        setAttribute(scriptElement, 'data-ackee-server', ACKEE_SERVER);
+        setAttribute(scriptElement, 'data-ackee-domain-id', this.i!);
+        setAttribute(scriptElement, 'async', '');
+        setAttribute(scriptElement, 'src', ACKEE_SCRIPT_URL);
+        appendChild(document.head, scriptElement);
     }
 
     /**
@@ -86,15 +84,11 @@ export class StatsTracker {
     private render(toSetTo: boolean) {
         debug_info("StatsTracker.render", toSetTo);
 
-        this.e.innerHTML = "";
-
         // create a link to (undo) opt-out
         const link = createElement('a');
-        link.setAttribute('href', "javascript:void");
-        if (this.t) {
-            link.style.color = this.t;
-        }
-        link.appendChild(createTextNode(toSetTo ? TEXT_STATS_OFF : TEXT_STATS_ON));
+        setAttribute(link, 'href', "javascript:void");
+        link.style.color = this.t || "";
+        appendChild(link, createTextNode((toSetTo ? TEXT_STATS_OFF_PREFIX : "") + TEXT_STATS));
         link.addEventListener('click', (e: MouseEvent) => {
             e.preventDefault();
             this.stats = toSetTo;
@@ -102,9 +96,10 @@ export class StatsTracker {
         });
         
         // append the text to the 'extraNode'
-        this.e.innerHTML = "";
-        this.e.appendChild(link);
-        this.e.appendChild(createTextNode(TEXT_STATS_SUFFIX));
+        const element = this.e;
+        element.innerHTML = "";
+        appendChild(element, link);
+        appendChild(element, createTextNode(TEXT_STATS_SUFFIX));
     }
 
 
@@ -112,7 +107,7 @@ export class StatsTracker {
      * getOptOut gets the optOutState
      */
     private get optout(): boolean {
-        const optout = win.localStorage.getItem(STATS_OPT_OUT_KEY) !== null;
+        const optout = localStorage.getItem(STATS_OPT_OUT_KEY) !== null;
         debug_info("get StatsTracker.optout", optout);
         return optout;
     }
@@ -124,9 +119,9 @@ export class StatsTracker {
     private set optout(value: boolean) {
         debug_info("set StatsTracker.optout", value);
         if(value) {
-            win.localStorage.setItem(STATS_OPT_OUT_KEY, STATS_OPT_OUT_VALUE);
+            localStorage.setItem(STATS_OPT_OUT_KEY, STATS_OPT_OUT_VALUE);
         } else {
-            win.localStorage.removeItem(STATS_OPT_OUT_KEY);
+            localStorage.removeItem(STATS_OPT_OUT_KEY);
         }
     }
 

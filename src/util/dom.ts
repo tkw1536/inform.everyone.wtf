@@ -1,13 +1,11 @@
-import { doc, win } from "./globals";
-
 /** currentScript returns the current script that is being executed */
 export function currentScript(): HTMLScriptElement | null {
-    const script = doc.currentScript;
+    const script = document.currentScript;
     if (script !== null) {
         return script as HTMLScriptElement;
     }
 
-    const scripts = doc.getElementsByTagName("script");
+    const scripts = document.getElementsByTagName("script");
     return scripts[scripts.length - 1];
 }
 
@@ -23,7 +21,7 @@ export function insertAfter(element: HTMLElement, after: HTMLElement) {
     if(sibling !== null) {
         parentNode?.insertBefore(element, sibling);
     } else {
-        parentNode?.appendChild(element);
+        appendChild(parentNode, element);
     }
 }
 
@@ -32,7 +30,7 @@ export function insertAfter(element: HTMLElement, after: HTMLElement) {
  * @param content Content of TextNode to create
  */
 export function createTextNode(content: string) {
-    return doc.createTextNode(content);
+    return document.createTextNode(content);
 }
 
 /**
@@ -40,5 +38,28 @@ export function createTextNode(content: string) {
  * @param tagName tagName of element to create
  */
 export function createElement<T extends keyof HTMLElementTagNameMap>(tagName: T): HTMLElementTagNameMap[T] {
-    return doc.createElement(tagName);
+    return document.createElement(tagName);
+}
+
+/**
+ * Set an attribute on an element
+ * @param element Element to modify
+ * @param attribute Attribute to set
+ * @param value Value to set it to 
+ */
+export function setAttribute(element: HTMLElement, attribute: string, value: string) {
+    element.setAttribute(attribute, value);
+}
+
+export function missingAttribute(element: HTMLElement, attribute: string): boolean {
+    return !element.hasAttribute(attribute);
+}
+
+/**
+ * Appens a child to a node
+ * @param node Node to append child to
+ * @param newChild New Child to append
+ */
+export function appendChild(node: Node | null, newChild: Node) {
+    node?.appendChild(newChild)
 }

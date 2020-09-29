@@ -1,12 +1,11 @@
 import { ILegalOptions, isIURLSettableOption } from "./ILegalOptions";
 import { BORDER_SIZE, DARK_THEME, LARGE_SPACE, LIGHT_THEME, SMALL_SPACE } from "./ITheme";
 import { debug_fatal, debug_info, debug_warn } from "./util/debug";
-import { createElement, createTextNode, insertAfter } from "./util/dom";
+import { appendChild, createElement, createTextNode, insertAfter, missingAttribute, setAttribute } from "./util/dom";
 import { shallowClone } from "./util/misc";
 import { StatsTracker } from "./StatsTracker";
-import { TEXT_PREFIX, TEXT_PREFIX_COOKIES, TEXT_SUFFIX, URL_TITLE, URL_TITLE_COOKIES } from "./Text";
+import { TEXT_PREFIX, TEXT_PREFIX_COOKIES, TEXT_SUFFIX, URL_TITLE_COOKIES, URL_TITLE_PREFIX, URL_TITLE_SUFFIX } from "./Text";
 import { ACKEE_SERVER, STATS_ID_ATTR, URL_POLICY } from "./Config";
-import { doc, win } from "./util/globals";
 
 export class Legal {
     /**
@@ -33,14 +32,15 @@ export class Legal {
         srcOptions.forEach(option => {
             if (option === '') return;
             if(!isIURLSettableOption(option)){
-                debug_warn(`Option '${option}' is not known. `);
+                debug_warn("Option", option, "is not known. ");
                 return;
             }
             options[option] = true;
         });
-        
+
         // When the element was loaded without a defer or async attr we should insert it right after this element. 
-        if (!element.hasAttribute('defer') && !element.hasAttribute('async')) {
+        if (missingAttribute(element, 'defer') && missingAttribute(element, 'async')) {
+            debug_info("options.element", element);
             options.element = element;
         }
 
@@ -54,7 +54,7 @@ export class Legal {
         return new Legal(options);
     }
 
-    private o: ILegalOptions; // Options passed by the user
+    private o: HTMLElement | undefined;
 
     // all of the elements
     private p: HTMLDivElement;
@@ -64,126 +64,122 @@ export class Legal {
      * Creates a new instance of Legal
      * @param options Options to be passed
      */
-    constructor(options: ILegalOptions) {
-        debug_info("Legal.constructor", options);
+    constructor(options_: ILegalOptions) {
+        debug_info("Legal.constructor", options_);
         
-        this.o = shallowClone(options);
+        const options = shallowClone(options_);
+        this.o = options.element;
 
         // Setup the theme and set the border color to transparent when needed. 
         // Because we modify theme here, we need to clone it. 
-        const theme = shallowClone(this.o.dark ? DARK_THEME : LIGHT_THEME);
-        if (!this.o.float) {
-            theme.s = 'transparent';
+        const theme = shallowClone(options.dark ? DARK_THEME : LIGHT_THEME);
+        if (!options.float) {
+            theme.b = 'transparent';
         }
 
         // When we have an element set, turn off the fixed and no border options
-        if(this.o.element) {
-            this.o.float = true;
-            theme.s = 'transparent';
+        if(options.element) {
+            options.float = true;
+            theme.b = 'transparent';
         }
 
         // If the user can not opt-out disable statistics to be safe. 
         // That way you can't say the user could not opt out. 
-        if (!win.localStorage && this.o.siteID) {
+        if (!localStorage && options.siteID) {
             debug_warn('Local Storage is not supported by this Browser. ');
             debug_warn('Assuming that the user has opted out statistics to be safe. ');
-            delete this.o.siteID;
+            delete options.siteID;
         }
 
         debug_info("Legal.constructor init_elements");
 
-        this.p = createElement('div');
-        this.e = createElement(this.o.element ? 'span' : 'small');
+        const parent = this.p = createElement('div');
+        const element = this.e = createElement(options.element ? 'span' : 'small');
         const link = createElement('a');
         const optOutElement = createElement('span');
 
         debug_info("Legal.constructor init_element_tree");
 
         // Setup the <a> element
-        link.setAttribute('href', URL_POLICY);
-        link.setAttribute('target', '_blank');
-        link.appendChild(
-            createTextNode(
-                this.o.cookies ? URL_TITLE_COOKIES : URL_TITLE)
-        );
+        setAttribute(link, 'href', URL_POLICY);
+        setAttribute(link, 'target', '_blank');
+        appendChild(link, createTextNode(URL_TITLE_PREFIX + (options.cookies ? URL_TITLE_COOKIES : "") + URL_TITLE_SUFFIX));
 
         // Setup the element itself
-        this.e.appendChild(createTextNode(
-            (this.o.cookies ? TEXT_PREFIX_COOKIES : '') +
+        appendChild(element, createTextNode(
+            (options.cookies ? TEXT_PREFIX_COOKIES : '') +
             TEXT_PREFIX,
         ));
-        this.e.appendChild(link);
-        this.e.appendChild(createTextNode(TEXT_SUFFIX));
-        this.e.appendChild(optOutElement);
+        appendChild(element, link);
+        appendChild(element, createTextNode(TEXT_SUFFIX));
+        appendChild(element, optOutElement);
         
         // finally append it to the parent
-        this.p.appendChild(this.e);
+        appendChild(parent, element);
         
         // create a new tracker
         if (ACKEE_SERVER !== undefined) {
-            new StatsTracker(optOutElement, this.o.siteID, this.o.element ? undefined : theme.l);
+            new StatsTracker(optOutElement, options.siteID, options.element ? undefined : theme.l);
         }
     
         debug_info("Legal.constructor style_elements");
-        if (this.o.element) return;
+        if (options.element) return;
 
-        this.e.style.color = theme.f;
+        const elementStyle = element.style;
+        const parentStyle = parent.style;
+
+        elementStyle.color = theme.p;
         link.style.color = theme.l;
 
-        this.e.style.borderColor = theme.s;
-        if (!this.o.float) {
-            this.e.style.background = theme.b;
+        elementStyle.borderColor = theme.b;
+        if (!options.float) {
+            elementStyle.background = theme.s;
         }
 
-        // setup the positioing
-        this.e.style.display = 'block';
+        // setup the positioning
+        elementStyle.display = 'block';
         
-        if (!this.o.float) {
-            this.p.style.position = 'fixed';
+        if (!options.float) {
+            parentStyle.position = 'fixed';
             // align to the right
-            this.p.style.right = LARGE_SPACE;
-            this.e.style.position = 'relative';
-            this.e.style.right = LARGE_SPACE;
+            parentStyle.right = LARGE_SPACE;
+            elementStyle.position = 'relative';
+            elementStyle.right = LARGE_SPACE;
 
             // margin and padding
-            this.e.style.border = BORDER_SIZE + " solid " + theme.s;
-            this.e.style.padding = SMALL_SPACE;
-            this.e.style.borderRadius = LARGE_SPACE;
+            elementStyle.border = BORDER_SIZE + " solid " + theme.b;
+            elementStyle.padding = SMALL_SPACE;
+            elementStyle.borderRadius = LARGE_SPACE;
 
-            this.p.style.bottom = '0px';
+            parentStyle.bottom = '0px';
         } else {
             // align to the right
-            this.e.style.textAlign = 'right';
+            elementStyle.textAlign = 'right';
 
             // hide overflow on the parent
-            this.p.style.margin = '0';
-            this.p.style.padding = '0';
-            this.p.style.overflow = 'none';
-            this.p.style.width = '100%';
+            parentStyle.margin = '0';
+            parentStyle.padding = '0';
+            parentStyle.overflow = 'none';
+            parentStyle.width = '100%';
 
             // no margin, and proper padding
-            this.e.style.margin = '0';
-            this.e.style.paddingTop = SMALL_SPACE;
-            this.e.style.paddingBottom = SMALL_SPACE;
-            this.e.style.paddingRight = LARGE_SPACE;
+            elementStyle.margin = '0';
+            elementStyle.paddingTop = SMALL_SPACE;
+            elementStyle.paddingBottom = SMALL_SPACE;
+            elementStyle.paddingRight = LARGE_SPACE;
 
             // border in the right place
-            this.e.style.borderTop = BORDER_SIZE +" solid " +theme.s;
+            elementStyle.borderTop = BORDER_SIZE +" solid " +theme.b;
         }
-    
     }
-
-    //
-    // MAIN RUN CODE
-    //
 
     run() {
         debug_info("Legal.run");
         
-        if (this.o.element) {
-            insertAfter(this.e, this.o.element);
+        if (this.o) {
+            insertAfter(this.e, this.o);
         } else {
-            doc.body.appendChild(this.p)
+            appendChild(document.body, this.p);
         }
     }
 

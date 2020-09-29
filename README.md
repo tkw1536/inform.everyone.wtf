@@ -24,8 +24,8 @@ The defaults are configured for my personal domain.
 
 The default build supports all major browsers released in the last five years as well as IE 11. 
 Note that ACKEE may not support older browser versions. 
-After bundling and minifying the code, it is about 5 KB in size (without gzip).
-When setting `ACKEE_SERVER=""`, it is about 3 KB. 
+After bundling and minifying the code, it is about 4 KB in size (without gzip).
+When setting `ACKEE_SERVER=""`, it is about 2.5 KB. 
 
 
 ## Usage

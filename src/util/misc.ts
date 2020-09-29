@@ -5,7 +5,7 @@
 export function shallowClone<T extends Record<string, any>>(original: T): T {
     const clone: {[key: string]: any} = {};
     for (const key in original) {
-        if (!original.hasOwnProperty(key)) continue;
+        // if (!original.hasOwnProperty(key)) continue; // not needed because it's a record
         clone[key] = original[key];
     }
     return clone as T;
