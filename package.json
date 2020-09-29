@@ -33,5 +33,8 @@
     "nodemon": "^2.0.4",
     "parcel": "^2.0.0-beta.1",
     "push-dir": "^0.4.1"
+  },
+  "resolutions": {
+    "parcel/**/node-forge": "^0.10.0"
   }
 }
