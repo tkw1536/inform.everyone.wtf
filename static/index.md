@@ -3,7 +3,7 @@ layout: default
 title: "Legal: Imprint & Privacy Policy"
 ---
 
-<script defer src="/legal.min.js?float" data-site-id="9ac41815-4b51-4418-984e-e5b43559a75e"></script>
+<script defer src="/legal.min.js?float" data-site-id="{{ site.site_id }}"></script>
 
 # Legal: Imprint & Privacy Policy
 

@@ -7,6 +7,7 @@ The legal script inserts a link to my privacy policy and also loads the statisti
 
 - `src/` -- Typescript Library Source file
 - `static/` -- Static files for the gh-pages site
+- `static-test/` -- Additional static files for local gh-pages only
 - `dist/` -- Output folder, deployed to gh-pages
 
 ## Build

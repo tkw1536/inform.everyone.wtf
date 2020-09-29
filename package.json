@@ -18,10 +18,12 @@
   "scripts": {
     "build": "parcel build --no-cache src/index.ts",
     "build-static": "copyup static/* static/*/* static/*/*/* dist",
-    "dev": "rm -rf dist && yarn build && concurrently --kill-others \"yarn dev-ts\" \"yarn dev-static\" \"cd dist && jekyll serve\"",
+    "build-static-test": "copyup static-test/* static-test/*/* static-test/*/*/* dist",
+    "dev": "rm -rf dist && yarn build && concurrently --kill-others \"yarn dev-ts\" \"yarn dev-static\" \"yarn dev-static-test\" \"cd dist && jekyll serve\"",
     "dev-ts": "nodemon --ext '*' --watch ./src/  --exec 'NODE_ENV=development yarn build --no-minify'",
     "dev-static": "nodemon --ext '*' --watch ./static/  --exec 'yarn build-static' ",
-    "dist": "NODE_ENV=production yarn build --no-source-maps && yarn build-static",
+    "dev-static-test": "nodemon --ext '*' --watch ./static-test/  --exec 'yarn build-static-test' ",
+    "dist": "rm -rf dist && NODE_ENV=production yarn build --no-source-maps && yarn build-static",
     "deploy": "yarn dist && push-dir --dir=dist --branch=gh-pages"
   },
   "dependencies": {

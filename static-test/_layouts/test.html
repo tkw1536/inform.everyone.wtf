@@ -1,0 +1,37 @@
+---
+layout: default
+---
+
+{% if page.flags contains 'dark' %}
+<style>
+    body { color: white; background: black; }
+</style>
+{% endif %}
+
+<h1>
+    Test for live={{page.live}} defer={{ page.defer }} flags={{ page.flags }} siteid={{page.siteid}}
+</h1>
+
+
+<p>
+    <code>
+        &ltscript {% if page.defer %}async{% endif %} {% if page.siteid %}data-site-id="{{ site.site_id }}"{% endif %} src="{% if page.live %}https://inform.everyone.wtf{%endif%}/legal.min.js{{ page.flags }}"&gt;&lt;/script&gt;
+    </code>
+</p>
+
+
+<p>
+    <script {% if page.defer %}async{% endif %} {% if page.siteid %}data-site-id="{{ site.site_id }}"{% endif %} src="{% if page.live %}https://inform.everyone.wtf{%endif%}/legal.min.js{{ page.flags }}"></script>
+</p>
+
+{{ content }}
+
+<p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut varius lacus sem, sit amet condimentum sem scelerisque nec. Donec scelerisque, sapien in aliquam vulputate, lacus enim pharetra odio, vitae tincidunt tortor tortor at erat. Proin sit amet vestibulum justo. Fusce id felis eget tortor lobortis dapibus. Cras eleifend orci vitae nunc dignissim, et commodo arcu euismod. Phasellus vitae urna nec lacus imperdiet hendrerit. Proin sed quam a velit pretium consequat in ultricies mi. Praesent accumsan urna sed nulla tempus, sit amet bibendum felis ultricies. Etiam elementum tellus massa, eu sollicitudin ante fermentum placerat. Vestibulum placerat eleifend ultrices. Phasellus fringilla erat eu libero suscipit, a facilisis nisl rhoncus. Sed a justo sit amet nibh ullamcorper ornare. Aenean ultricies lacus eget libero malesuada tempus.
+</p>
+<p>
+    Nunc ultrices tincidunt condimentum. Donec non vehicula lacus. Quisque eget ligula aliquam, placerat tortor id, congue urna. Quisque eget cursus eros. Maecenas mauris est, consequat egestas dictum ut, euismod a leo. Etiam feugiat ante vel erat tristique rhoncus. In consequat ipsum sit amet orci tristique, in lobortis eros dapibus. Vivamus et suscipit ex. Sed tincidunt, dolor quis sagittis vestibulum, mi mauris tincidunt ex, ut bibendum nulla turpis sit amet ipsum. Nam urna augue, aliquam at justo sed, efficitur feugiat ligula. Donec id neque odio. In non nisl et odio bibendum maximus. Sed leo purus, interdum ullamcorper nibh dictum, rutrum feugiat mi. Donec vel augue aliquet, egestas tellus quis, facilisis elit.
+</p>
+<p>
+    Ut ut rhoncus lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed at ante eget urna facilisis malesuada. Etiam a aliquam odio. Vivamus egestas sed nunc sit amet tincidunt. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vivamus neque quam, dignissim sit amet arcu a, placerat iaculis arcu.
+</p>
