@@ -8,13 +8,6 @@ declare const process: {
 }
 
 /**
- * Checks if debug mode is enabled
- */
-export function debug_enabled(): boolean {
-    return process.env.NODE_ENV !== "production";
-}
-
-/**
  * Prints a warning to the info log
  * @param data Data to print to the info log
  */
