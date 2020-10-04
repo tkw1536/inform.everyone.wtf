@@ -7,56 +7,49 @@ import { appendChild, createElement, createTextNode, setAttribute } from "./util
 
 
 /**
- * Creates a new StatsTrack instance
+ * @param element Element to store text under
+ * @param siteID Site ID for script tag to build
+ * @param linkColor Color to set link to. Optional. 
  */
-export class StatsTracker {
-    /**
-     * @param e Element to store text under
-     * @param i Site ID for script tag to build
-     * @param t Color to set link to. Optional. 
-     */
-    constructor(
-        private readonly e: HTMLSpanElement,
-        private readonly i?: string,
-        private readonly t?: string,
+export function StatsTracker(
+    element: HTMLSpanElement,
+    siteID?: string,
+    linkColor?: string,
+) {
+    debug_info("StatsTracker.init", element, siteID, linkColor);
+    if(!siteID) return;
 
-    ) {
-        debug_info("StatsTracker.constructor", e, i, t);
-
-        if (!this.i) return;
-
-        this.stats = !this.optout;
-    }
+    setStats(!getOptout())
 
     /**
      * set stats sets up the statistics script to to toggle on or off
     */
-    private set stats(value: boolean) {
+    function setStats(value: boolean) {
         debug_info("set StatsTracker.stats");
 
-        this.optout = !value;
-        this.render(!value);
+        setOptout(!value);
+        render(!value);
 
         if(value) {
-            this.load();
+            load();
         } else {
-            this.unload();
+            unload();
         }
     }
 
-    private s?: HTMLScriptElement; // the <script> element that implements tracking
+    let scriptElement: HTMLScriptElement | undefined; // the <script> element that implements tracking
 
     /**
      * load the statistics script
      */
-    private load() {
+    function load() {
         debug_info("StatsTracker.load");
-    
-        if(this.s || !ACKEE_SERVER || !ACKEE_SCRIPT_URL) return;
 
-        const scriptElement = this.s = createElement('script');
+        if(scriptElement || !ACKEE_SERVER || !ACKEE_SCRIPT_URL) return;
+
+        scriptElement = createElement('script');
         setAttribute(scriptElement, 'data-ackee-server', ACKEE_SERVER);
-        setAttribute(scriptElement, 'data-ackee-domain-id', this.i!);
+        setAttribute(scriptElement, 'data-ackee-domain-id', siteID!);
         setAttribute(scriptElement, 'async', '');
         setAttribute(scriptElement, 'src', ACKEE_SCRIPT_URL);
         appendChild(document.head, scriptElement);
@@ -65,38 +58,37 @@ export class StatsTracker {
     /**
      * Unload the statistics script
      */
-    private unload() {
+    function unload() {
         debug_info("StatsTracker.unload");
 
         // If we didn't load the script, there is nothing to do. 
-        if(this.s === undefined) return;
+        if(scriptElement === undefined) return;
 
         // With the current method of inclusion it is not actually possible to unload the script.
         // We need to reload the page first. 
         // However there might be any kind of state on the current page, so we inform the user first. 
         if(!confirm(TEXT_OPTOUT_RELOAD_NOW)) return;
-        location.reload()
+        location.reload();
     }
 
     /**
      * Render sets the stats link to update the state to toSetTo
      */
-    private render(toSetTo: boolean) {
+    function render(toSetTo: boolean) {
         debug_info("StatsTracker.render", toSetTo);
 
         // create a link to (undo) opt-out
         const link = createElement('a');
         setAttribute(link, 'href', "javascript:void");
-        link.style.color = this.t || "";
+        link.style.color = linkColor || "";
         appendChild(link, createTextNode((toSetTo ? TEXT_STATS_OFF_PREFIX : "") + TEXT_STATS));
         link.addEventListener('click', (e: MouseEvent) => {
             e.preventDefault();
-            this.stats = toSetTo;
+            setStats(toSetTo);
             return false;
         });
         
         // append the text to the 'extraNode'
-        const element = this.e;
         element.innerHTML = "";
         appendChild(element, link);
         appendChild(element, createTextNode(TEXT_STATS_SUFFIX));
@@ -106,7 +98,7 @@ export class StatsTracker {
     /**
      * getOptOut gets the optOutState
      */
-    private get optout(): boolean {
+    function getOptout(): boolean {
         const optout = localStorage.getItem(STATS_OPT_OUT_KEY) !== null;
         debug_info("get StatsTracker.optout", optout);
         return optout;
@@ -116,7 +108,7 @@ export class StatsTracker {
      * setOptOut gets the optOutState
      * @param value 
      */
-    private set optout(value: boolean) {
+    function setOptout(value: boolean) {
         debug_info("set StatsTracker.optout", value);
         if(value) {
             localStorage.setItem(STATS_OPT_OUT_KEY, STATS_OPT_OUT_VALUE);
@@ -124,5 +116,4 @@ export class StatsTracker {
             localStorage.removeItem(STATS_OPT_OUT_KEY);
         }
     }
-
 }
