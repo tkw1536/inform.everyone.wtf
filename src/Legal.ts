@@ -119,7 +119,7 @@ export class Legal {
         
         // create a new tracker
         if (ACKEE_SERVER !== undefined) {
-            new StatsTracker(optOutElement, options.siteID, options.element ? undefined : theme.l);
+            StatsTracker(optOutElement, options.siteID, options.element ? undefined : theme.l);
         }
     
         debug_info("Legal.constructor style_elements");
