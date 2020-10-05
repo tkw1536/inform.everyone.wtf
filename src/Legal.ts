@@ -8,70 +8,62 @@ import { TEXT_PREFIX, TEXT_PREFIX_COOKIES, TEXT_SUFFIX, URL_TITLE_COOKIES, URL_T
 import { ACKEE_SERVER, URL_POLICY } from "./Config";
 
 export function Legal(options: ILegalOptions) {
-    // all of the elements
-    let parentElement: HTMLDivElement;
-    let element: HTMLElement;
+    debug_info("Legal.constructor", options);
 
-    init();
-    run();
+    // Setup the theme and set the border color to transparent when needed. 
+    // Because we modify theme here, we need to clone it. 
+    const theme = shallowClone(options.dark ? DARK_THEME : LIGHT_THEME);
+    if (!options.float) {
+        theme.b = 'transparent';
+    }
 
-    function init() {
-        debug_info("Legal.constructor", options);
+    // When we have an element set, turn off the fixed and no border options
+    if(options.element) {
+        options.float = true;
+        theme.b = 'transparent';
+    }
+
+    // If the user can not opt-out disable statistics to be safe. 
+    // That way you can't say the user could not opt out. 
+    if (!localStorage && options.siteID) {
+        debug_warn('Local Storage is not supported by this Browser. ');
+        debug_warn('Assuming that the user has opted out statistics to be safe. ');
+        delete options.siteID;
+    }
+
+    debug_info("Legal.constructor init_elements");
+
+    const parentElement = createElement('div');
+    const element = createElement(options.element ? 'span' : 'small');
+    const link = createElement('a');
+    const optOutElement = createElement('span');
+
+    debug_info("Legal.constructor init_element_tree");
+
+    // Setup the <a> element
+    setAttribute(link, 'href', URL_POLICY);
+    setAttribute(link, 'target', '_blank');
+    appendChild(link, createTextNode(URL_TITLE_PREFIX + (options.cookies ? URL_TITLE_COOKIES : "") + URL_TITLE_SUFFIX));
+
+    // Setup the element itself
+    appendChild(element, createTextNode(
+        (options.cookies ? TEXT_PREFIX_COOKIES : '') +
+        TEXT_PREFIX,
+    ));
+    appendChild(element, link);
+    appendChild(element, createTextNode(TEXT_SUFFIX));
+    appendChild(element, optOutElement);
     
-        // Setup the theme and set the border color to transparent when needed. 
-        // Because we modify theme here, we need to clone it. 
-        const theme = shallowClone(options.dark ? DARK_THEME : LIGHT_THEME);
-        if (!options.float) {
-            theme.b = 'transparent';
-        }
-
-        // When we have an element set, turn off the fixed and no border options
-        if(options.element) {
-            options.float = true;
-            theme.b = 'transparent';
-        }
-
-        // If the user can not opt-out disable statistics to be safe. 
-        // That way you can't say the user could not opt out. 
-        if (!localStorage && options.siteID) {
-            debug_warn('Local Storage is not supported by this Browser. ');
-            debug_warn('Assuming that the user has opted out statistics to be safe. ');
-            delete options.siteID;
-        }
-
-        debug_info("Legal.constructor init_elements");
-
-        parentElement = createElement('div');
-        element = createElement(options.element ? 'span' : 'small');
-        const link = createElement('a');
-        const optOutElement = createElement('span');
-
-        debug_info("Legal.constructor init_element_tree");
-
-        // Setup the <a> element
-        setAttribute(link, 'href', URL_POLICY);
-        setAttribute(link, 'target', '_blank');
-        appendChild(link, createTextNode(URL_TITLE_PREFIX + (options.cookies ? URL_TITLE_COOKIES : "") + URL_TITLE_SUFFIX));
-
-        // Setup the element itself
-        appendChild(element, createTextNode(
-            (options.cookies ? TEXT_PREFIX_COOKIES : '') +
-            TEXT_PREFIX,
-        ));
-        appendChild(element, link);
-        appendChild(element, createTextNode(TEXT_SUFFIX));
-        appendChild(element, optOutElement);
-        
-        // finally append it to the parent
-        appendChild(parentElement, element);
-        
-        // create a new tracker
-        if (ACKEE_SERVER !== undefined) {
-            StatsTracker(optOutElement, options.siteID, options.element ? undefined : theme.l);
-        }
+    // finally append it to the parent
+    appendChild(parentElement, element);
     
+    // create a new tracker
+    if (ACKEE_SERVER !== undefined) {
+        StatsTracker(optOutElement, options.siteID, options.element ? undefined : theme.l);
+    }
+
+    if (!options.element) {
         debug_info("Legal.constructor style_elements");
-        if (options.element) return;
 
         const elementStyle = element.style;
         const parentStyle = parentElement.style;
@@ -121,14 +113,10 @@ export function Legal(options: ILegalOptions) {
         }
     }
 
-    function run() {
-        debug_info("Legal.run");
-        
-        if (options.element) {
-            insertAfter(element, options.element);
-        } else {
-            appendChild(document.body, parentElement);
-        }
+    debug_info("Legal.run");  
+    if (options.element) {
+        insertAfter(element!, options.element);
+    } else {
+        appendChild(document.body, parentElement!);
     }
-    
 }
