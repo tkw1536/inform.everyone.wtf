@@ -7,23 +7,17 @@ import { StatsTracker } from "./StatsTracker";
 import { TEXT_PREFIX, TEXT_PREFIX_COOKIES, TEXT_SUFFIX, URL_TITLE_COOKIES, URL_TITLE_PREFIX, URL_TITLE_SUFFIX } from "./Text";
 import { ACKEE_SERVER, URL_POLICY } from "./Config";
 
-export class LegalLegacy {
-    private o: HTMLElement | undefined;
-
+export function Legal(options: ILegalOptions) {
     // all of the elements
-    private p: HTMLDivElement;
-    private e: HTMLElement;
-        
-    /**
-     * Creates a new instance of Legal
-     * @param options Options to be passed
-     */
-    constructor(options_: ILegalOptions) {
-        debug_info("Legal.constructor", options_);
-        
-        const options = shallowClone(options_);
-        this.o = options.element;
+    let parentElement: HTMLDivElement;
+    let element: HTMLElement;
 
+    init();
+    run();
+
+    function init() {
+        debug_info("Legal.constructor", options);
+    
         // Setup the theme and set the border color to transparent when needed. 
         // Because we modify theme here, we need to clone it. 
         const theme = shallowClone(options.dark ? DARK_THEME : LIGHT_THEME);
@@ -47,8 +41,8 @@ export class LegalLegacy {
 
         debug_info("Legal.constructor init_elements");
 
-        const parent = this.p = createElement('div');
-        const element = this.e = createElement(options.element ? 'span' : 'small');
+        parentElement = createElement('div');
+        element = createElement(options.element ? 'span' : 'small');
         const link = createElement('a');
         const optOutElement = createElement('span');
 
@@ -69,7 +63,7 @@ export class LegalLegacy {
         appendChild(element, optOutElement);
         
         // finally append it to the parent
-        appendChild(parent, element);
+        appendChild(parentElement, element);
         
         // create a new tracker
         if (ACKEE_SERVER !== undefined) {
@@ -80,7 +74,7 @@ export class LegalLegacy {
         if (options.element) return;
 
         const elementStyle = element.style;
-        const parentStyle = parent.style;
+        const parentStyle = parentElement.style;
 
         elementStyle.color = theme.p;
         link.style.color = theme.l;
@@ -127,14 +121,14 @@ export class LegalLegacy {
         }
     }
 
-    run() {
+    function run() {
         debug_info("Legal.run");
         
-        if (this.o) {
-            insertAfter(this.e, this.o);
+        if (options.element) {
+            insertAfter(element, options.element);
         } else {
-            appendChild(document.body, this.p);
+            appendChild(document.body, parentElement);
         }
     }
-
+    
 }
