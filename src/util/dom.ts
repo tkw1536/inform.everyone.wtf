@@ -1,7 +1,7 @@
 /** currentScript returns the current script that is being executed */
 export function currentScript(): HTMLScriptElement | null {
     const script = document.currentScript;
-    if (script !== null) {
+    if (script) {
         return script as HTMLScriptElement;
     }
 
@@ -16,10 +16,11 @@ export function currentScript(): HTMLScriptElement | null {
  */
 export function insertAfter(element: HTMLElement, after: HTMLElement) {
     const parentNode = after.parentElement;
+    if (!parentNode) return;
 
     const sibling = after.nextSibling;
-    if(sibling !== null) {
-        parentNode?.insertBefore(element, sibling);
+    if(!sibling) {
+        parentNode.insertBefore(element, sibling);
     } else {
         appendChild(parentNode, element);
     }
@@ -60,6 +61,6 @@ export function missingAttribute(element: HTMLElement, attribute: string): boole
  * @param node Node to append child to
  * @param newChild New Child to append
  */
-export function appendChild(node: Node | null, newChild: Node) {
-    node?.appendChild(newChild)
+export function appendChild(node: Node, newChild: Node) {
+    node.appendChild(newChild)
 }
