@@ -1,6 +1,6 @@
 import { STATS_ID_ATTR } from "./Config";
 import { ILegalOptions, isIURLSettableOption } from "./ILegalOptions";
-import { LegalLegacy } from "./Legal";
+import { Legal } from "./Legal";
 import { debug_fatal, debug_info, debug_warn } from "./util/debug";
 import { currentScript, missingAttribute } from "./util/dom";
 
@@ -39,7 +39,7 @@ if (element && typeof (src = element.getAttribute('src')) === 'string') {
     }
 
     // Create the new Legal object from the provided options.
-    (new LegalLegacy(options)).run();
+    Legal(options);
 } else {
     debug_fatal("Missing 'src' attribute of script. ");
 }
