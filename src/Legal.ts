@@ -1,59 +1,13 @@
-import { ILegalOptions, isIURLSettableOption } from "./ILegalOptions";
+import { ILegalOptions } from "./ILegalOptions";
 import { BORDER_SIZE, DARK_THEME, LARGE_SPACE, LIGHT_THEME, SMALL_SPACE } from "./ITheme";
-import { debug_fatal, debug_info, debug_warn } from "./util/debug";
+import { debug_info, debug_warn } from "./util/debug";
 import { appendChild, createElement, createTextNode, insertAfter, missingAttribute, setAttribute } from "./util/dom";
 import { shallowClone } from "./util/misc";
 import { StatsTracker } from "./StatsTracker";
 import { TEXT_PREFIX, TEXT_PREFIX_COOKIES, TEXT_SUFFIX, URL_TITLE_COOKIES, URL_TITLE_PREFIX, URL_TITLE_SUFFIX } from "./Text";
-import { ACKEE_SERVER, STATS_ID_ATTR, URL_POLICY } from "./Config";
+import { ACKEE_SERVER, URL_POLICY } from "./Config";
 
-export class Legal {
-    /**
-     * Generates a new instance of Legal from a script tag. 
-     * @param element <script> element to create instance from
-     */
-    static fromScriptTag(element: HTMLScriptElement): Legal | null  {
-        debug_info("Legal.fromScriptTag", element);
-
-        // Read the src url from the script tag and split it into options. 
-        const src = element.getAttribute('src');
-        if (typeof src !== 'string') {
-            debug_fatal("Missing 'src' attribute of script. ");
-            return null;
-        }
-        const srcOptions = new URL(src, location.href).search.substr(1).split(',');
-
-        // Parse the extracted options into a proper Options Dict. 
-        // We only parse non-empty options that are URL settable. 
-        // In case of an empty option, we ignore the option. 
-        // In case of an unknown option, we log it to the console. 
-        const options: ILegalOptions = {};
-
-        srcOptions.forEach(option => {
-            if (option === '') return;
-            if(!isIURLSettableOption(option)){
-                debug_warn("Option", option, "is not known. ");
-                return;
-            }
-            options[option] = true;
-        });
-
-        // When the element was loaded without a defer or async attr we should insert it right after this element. 
-        if (missingAttribute(element, 'defer') && missingAttribute(element, 'async')) {
-            debug_info("options.element", element);
-            options.element = element;
-        }
-
-        // When a site id was set (via a data attribute) we set the site id attribute here. 
-        const statsSiteId = element.getAttribute(STATS_ID_ATTR);
-        if (statsSiteId) {
-            options.siteID = statsSiteId;
-        }
-        
-        // Create the new Legal object from the provided options.
-        return new Legal(options);
-    }
-
+export class LegalLegacy {
     private o: HTMLElement | undefined;
 
     // all of the elements
