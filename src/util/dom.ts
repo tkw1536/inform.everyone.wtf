@@ -26,21 +26,8 @@ export function insertAfter(element: HTMLElement, after: HTMLElement) {
     }
 }
 
-/**
- * Creates a new TextNode of the given type
- * @param content Content of TextNode to create
- */
-export function createTextNode(content: string) {
-    return document.createTextNode(content);
-}
-
-/**
- * Creates a new element
- * @param tagName tagName of element to create
- */
-export function createElement<T extends keyof HTMLElementTagNameMap>(tagName: T): HTMLElementTagNameMap[T] {
-    return document.createElement(tagName);
-}
+export const createTextNode = document.createTextNode.bind(document);
+export const createElement = document.createElement.bind(document);
 
 /**
  * Set an attribute on an element
@@ -57,7 +44,7 @@ export function missingAttribute(element: HTMLElement, attribute: string): boole
 }
 
 /**
- * Appens a child to a node
+ * Appends a child to a node
  * @param node Node to append child to
  * @param newChild New Child to append
  */
