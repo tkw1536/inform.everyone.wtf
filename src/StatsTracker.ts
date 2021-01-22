@@ -50,7 +50,7 @@ export function StatsTracker(
         scriptElement = createElement('script');
         setAttribute(scriptElement, 'data-ackee-server', ACKEE_SERVER);
         setAttribute(scriptElement, 'data-ackee-domain-id', siteID!);
-        setAttribute(scriptElement, 'data-ackee-opts', '{"ignoreOwnVisits":true}')
+        setAttribute(scriptElement, 'data-ackee-opts', '{"ignoreOwnVisits":false}')
         setAttribute(scriptElement, 'async', '');
         setAttribute(scriptElement, 'src', ACKEE_SCRIPT_URL);
         appendChild(document.head, scriptElement);
