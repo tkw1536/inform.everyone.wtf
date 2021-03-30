@@ -193,9 +193,9 @@ This right to lodge a complaint may particularly be exercised before a superviso
 
 ### Site-specific Terms
 
-#### 'treasure.lol'
+#### 't.hw.is'
 
-In order for the [treasure.lol](https://treasure.lol/) website to function, I store and process the following information:
+In order for the [t.hw.is](https://t.hw.is/) website to function, I store and process the following information:
 
 - when you last visited the website, so that I can remove inactive accounts from the database from time to time. 
 - when you last pressed the button to grow, so that I know when I can allow you to next press the button. 
