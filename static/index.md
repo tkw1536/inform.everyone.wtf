@@ -206,3 +206,15 @@ I store this information separately from all other data collected on my website(
 In particular, I do not link this user id with any data collected when visiting any of my other websites. 
 You can delete this data at any time by clicking the `Start over` link at the bottom of the page. 
 In this case you will be assigned a new unique user id and your points will be reset. 
+
+#### 'k.hw.is'
+
+The [k.hw.is](https://k.hw.is/) in principle only collects the same information as listed above.
+
+Additionally, I offer certain specific users the possibility to upload their own SSH Keys and make them available publically. 
+The following only applies to these users.
+
+When you decide to upload a key I need to temporarily store any key(s) you upload in server memory and process them to make them available to others. 
+These keys are only stored as long as you permit it.
+You can either delete them by clicking the `Stop` button, or by navigating away from the page.
+Keys are never retained in any log files.
