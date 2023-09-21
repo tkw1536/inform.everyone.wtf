@@ -1,11 +1,11 @@
 ---
 layout: default
-title: "Legal: Imprint & Privacy Policy"
+title: "Legal: Terms of Service, Imprint & Privacy Policy"
 ---
 
 <script defer src="/legal.min.js?float" data-site-id="{{ site.site_id }}"></script>
 
-# Legal: Imprint & Privacy Policy
+# Legal: Terms Of Service, Imprint & Privacy Policy
 
 <div class='abstract'>
     <h2>Abstract</h2>
@@ -22,7 +22,7 @@ title: "Legal: Imprint & Privacy Policy"
 
 {% include address.md %}
 
-## Privacy Policy
+## Terms of Service and Privacy Policy
 
 Within this document, `you` (and `your`) refers to the `data subject` (in the sense of GDPR). 
 
@@ -33,9 +33,12 @@ Within this document, `you` (and `your`) refers to the `data subject` (in the se
 Please only contact me at this address (digitally or physically) when it is legally required. 
 See <a href="https://tkw01536.de" target="_blank">my homepage</a> for other means of getting in touch with me. 
 
-This document defines how I handle personal data relating to you. 
+This document defines terms for using any of my websites and how I handle personal data relating to you. 
 This section of the document applies to all websites. 
 Additional site-specific terms are found at the bottom of this document. 
+
+Anyone not living in the UK may use my website(s) for their intensed purpose(s). 
+It is not feasible for me to offer service to UK users as I do not posess the legal expertise to determine what compliance with the Online Safety Bill would entail. 
 
 Within the scope of GDPR I act as a data controller. 
 You can also consider me as the Data Protection Officer for my websites. 
