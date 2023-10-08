@@ -28,7 +28,7 @@
     "deploy": "yarn dist && gh-pages --dist dist --no-history --dotfiles"
   },
   "dependencies": {
-    "postcss": ">=8.2.10",
+    "postcss": ">=8.4.31",
     "typescript": "^4.4.4"
   },
   "devDependencies": {
