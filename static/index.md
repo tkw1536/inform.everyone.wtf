@@ -37,8 +37,11 @@ This document defines terms for using any of my websites and how I handle person
 This section of the document applies to all websites. 
 Additional site-specific terms are found at the bottom of this document. 
 
-Anyone not living in the UK may use my website(s) for their intensed purpose(s). 
-It is not feasible for me to offer service to UK users as I do not posess the legal expertise to determine what compliance with the Online Safety Bill would entail. 
+Anyone not living in the UK may use my website(s) for their intended purpose(s). 
+It is not feasible for me to offer service to UK users as I do not possess the legal expertise to determine what compliance with the Online Safety Bill would entail. 
+
+Furthermore, you may not access my website(s) in order to use them to train any machine learning model.
+This also includes accessing my website(s) via any chat-based AI service that might use part of my website as training data.
 
 Within the scope of GDPR I act as a data controller. 
 You can also consider me as the Data Protection Officer for my websites. 
