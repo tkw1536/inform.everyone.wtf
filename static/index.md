@@ -224,3 +224,11 @@ When you decide to upload a key I need to temporarily store any key(s) you uploa
 These keys are only stored as long as you permit it.
 You can either delete them by clicking the `Stop` button, or by navigating away from the page.
 Keys are never retained in any log files.
+
+
+#### 'friends.guys.wtf'
+
+The [friends.guys.wtf](https://friends.guys.wtf/) in principle only collects the same information as listed above.
+
+Additionally, when editing the friends list I store it in local storage. 
+This data never leaves your machine, and you can delete it at any time by clicking the Reset button. 
